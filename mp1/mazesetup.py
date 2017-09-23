@@ -1,6 +1,7 @@
 from Dot import *
 from Position import *
 from Node import *
+from collections import deque
 
 import queue
 
@@ -19,7 +20,7 @@ def posIsValid(pos):
             pos.getRow() < numRows and pos.getCol() < numCols)
 
 
-def getChildren(pos, maze_list):
+def getChildren(pos):
     children = []
     row = pos.getRow()
     col = pos.getCol()
@@ -29,14 +30,14 @@ def getChildren(pos, maze_list):
     left = Position(row, col - 1)
     right = Position(row, col + 1)
 
-    if(posIsValid(up)):
-        children.append(up)
-    if(posIsValid(down)):
-        children.append(down)
     if(posIsValid(left)):
         children.append(left)
     if(posIsValid(right)):
         children.append(right)
+    if(posIsValid(up)):
+        children.append(up)
+    if(posIsValid(down)):
+        children.append(down)
 
     print("Children length: " + str(len(children)))
     return children
@@ -54,24 +55,34 @@ def BFS(maze_list, start_pos, dot):
     starting_node = Node(start_pos, None, 0)
     if (starting_node.getPosition().__eq__(dot.getPosition())):
         return 0
-    frontier = queue.Queue(0)
-    frontier.put(starting_node)
+    frontier_pos = deque([])
+    frontier_node = deque([])
+    frontier_pos.append(starting_node.getPosition())
+    frontier_node.append(starting_node)
     explored = []
-    while not (frontier.empty()):
+    while (frontier_pos):
         print("Number of nodes visited: " + str(len(explored)))
-        print("Frontier size: " + str(frontier.qsize()))
-        top_frontier = frontier.get()
-        explored.append(top_frontier.getPosition())
-        children = getChildren(top_frontier.getPosition(), maze_list)
+        print("Frontier size: " + str(len(frontier_pos)))
+        top_frontier_pos = frontier_pos[0]
+        top_frontier_node = frontier_node[0]
+        frontier_pos.popleft()
+        frontier_node.popleft()
+        explored.append(top_frontier_pos)
+        children = getChildren(top_frontier_pos)
+
         for loc in children:
-            child = Node(loc, top_frontier, 1 + top_frontier.getPathCost())
-            if (not (isInExplored(child.getPosition(), explored)) or not (child in frontier.queue)):
+            child = Node(loc, top_frontier_node, 1 +
+                         top_frontier_node.getPathCost())
+
+            if not (isInExplored(child.getPosition(), explored) or isInExplored(child.getPosition(), frontier_pos)):
                 print("CHILD: " + child.getPosition().printPos() +
                       " DOT: " + dot.getPosition().printPos())
+
                 if (child.getPosition().__eq__(dot.getPosition())):
                     print("SUCCESS")
-                    return 1 + top_frontier.getPathCost()
-                frontier.put(child)
+                    return 1 + top_frontier_node.getPathCost()
+                frontier_pos.append(child.getPosition())
+                frontier_node.append(child)
 
 
 def main():
