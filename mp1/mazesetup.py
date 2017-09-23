@@ -45,28 +45,35 @@ def getChildren(pos):
 
 def isInExplored(pos, explored):
     for loc in explored:
-        # print("First: " + pos.printPos() + " Second: " + loc.printPos())
         if loc.__eq__(pos):
             return True
     return False
 
 
-def BFS(maze_list, start_pos, dot):
+def WFS(maze_list, start_pos, dot, type_of_search):
     starting_node = Node(start_pos, None, 0)
     if (starting_node.getPosition().__eq__(dot.getPosition())):
         return 0
-    frontier_pos = deque([])
-    frontier_node = deque([])
+    if type_of_search == "BFS":
+        frontier_pos = deque([])
+        frontier_node = deque([])
+    else:
+        frontier_pos = []
+        frontier_node = []
     frontier_pos.append(starting_node.getPosition())
     frontier_node.append(starting_node)
     explored = []
     while (frontier_pos):
         print("Number of nodes visited: " + str(len(explored)))
         print("Frontier size: " + str(len(frontier_pos)))
-        top_frontier_pos = frontier_pos[0]
-        top_frontier_node = frontier_node[0]
-        frontier_pos.popleft()
-        frontier_node.popleft()
+        if type_of_search == "BFS":
+            top_frontier_pos = frontier_pos[0]
+            top_frontier_node = frontier_node[0]
+            frontier_pos.popleft()
+            frontier_node.popleft()
+        else:
+            top_frontier_pos = frontier_pos.pop()
+            top_frontier_node = frontier_node.pop()
         explored.append(top_frontier_pos)
         children = getChildren(top_frontier_pos)
 
@@ -116,7 +123,9 @@ def main():
     print("Start row: " + str(start_pos.getRow()) +
           " Start col: " + str(start_pos.getCol()))
 
-    print(BFS(maze_list, start_pos, dot_list[0]))
+    # input BFS or DFS
+    search = "BFS"
+    print(WFS(maze_list, start_pos, dot_list[0], search))
 
 
 if __name__ == '__main__':
