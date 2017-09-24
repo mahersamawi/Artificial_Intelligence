@@ -1,58 +1,133 @@
+import queue
+
 from Dot import *
 from Position import *
 from Node import *
 from collections import deque
 
-import queue
-
-numRows = None
-numCols = None
+num_rows = None
+num_cols = None
 
 
-def printMaze(maze):
-    for i in maze:
-        print(i)
+def add_path_to_solution(maze, cur_node):
+    """Puts the "." in the maze for the solution path
+
+    Args:
+        maze: the 2-D maze 
+        cur_node: the node whose position will be marked with "." in the maze
+    Returns:
+        Nothing
+
+    """
+    for i in range(len(maze)):
+        for j in range(len(maze[i])):
+            row = cur_node.get_position().get_row()
+            col = cur_node.get_position().get_col()
+            if i == row and j == col:
+                maze[i][j] = "."
 
 
-def posIsValid(pos):
-    # number of rows: 23 number of columns: 61
-    return (pos.getRow() >= 0 and pos.getCol() >= 0 and
-            pos.getRow() < numRows and pos.getCol() < numCols)
+def print_maze_to_file(maze, out_file):
+    """Prints the maze to file
+
+    Args:
+        maze: the 2-D maze 
+        out_file: the name of the file to write to
+    Returns:
+        Nothing
+
+    """
+    with open(out_file, "w") as textFile:
+        for i in range(len(maze)):
+            for j in range(len(maze[i])):
+                textFile.write(maze[i][j])
+            textFile.write("\n")
 
 
-def getChildren(pos):
+def pos_is_valid(pos, maze_list):
+    """Checks to see if the position is valid and not a wall
+
+    Args:
+        pos: the position to check if it is valid
+        maze_list: the 2-D maze 
+    Returns:
+        True: if the position is a valid one
+        False: Otherwise
+
+    """
+    row = pos.get_row()
+    col = pos.get_col()
+    if (row >= 0 and col >= 0 and row < num_rows and col < num_cols):
+        if maze_list[row][col] == "%":
+            return False
+        return True
+    return False
+
+
+def get_children(pos, maze_list):
+    """Get the children/neighbor positions and if they are valid, append them to the children list 
+
+    Args:
+        pos: the position to check if it is valid
+        maze_list: the 2-D maze 
+    Returns:
+        children: list containing valid neighbors for that position
+
+    """
     children = []
-    row = pos.getRow()
-    col = pos.getCol()
-    print("Checking row: " + str(row) + " checking col: " + str(col))
+    row = pos.get_row()
+    col = pos.get_col()
     up = Position(row - 1, col)
     down = Position(row + 1, col)
     left = Position(row, col - 1)
     right = Position(row, col + 1)
 
-    if(posIsValid(left)):
+    if(pos_is_valid(left, maze_list)):
         children.append(left)
-    if(posIsValid(right)):
+    if(pos_is_valid(right, maze_list)):
         children.append(right)
-    if(posIsValid(up)):
+    if(pos_is_valid(up, maze_list)):
         children.append(up)
-    if(posIsValid(down)):
+    if(pos_is_valid(down, maze_list)):
         children.append(down)
 
-    print("Children length: " + str(len(children)))
     return children
 
 
-def isInExplored(pos, explored):
+def is_in_explored(pos, explored):
+    """Checks to see if pos is in the explored list by comparing the row and column 
+        of each position rather than the objects
+
+    Args:
+        pos: the position to check if it is valid
+        explored: list of visited positions
+    Returns:
+        True: if the position is in the explored list
+        False: Otherwise
+
+    """
     for loc in explored:
-        if loc.__eq__(pos):
+        if loc.equals(pos):
             return True
     return False
 
 
 def WFS(maze_list, start_pos, dot, type_of_search):
+    """ Function that runs DFS(stack) or BFS(queue) on the maze_list 
+
+    Args:
+        maze_list: the 2-D maze 
+        start_pos: the starting position
+        dot: the position of the dot to find
+        type_of_search: BFS or DFS depending on the search 
+
+    Returns:
+        child: node that is the path to the dot from the starting position
+        None: Otherwise
+
+    """
     starting_node = Node(start_pos, None, 0)
-    if (starting_node.getPosition().__eq__(dot.getPosition())):
+    if (starting_node.get_position().equals(dot.get_position())):
         return 0
     if type_of_search == "BFS":
         frontier_pos = deque([])
@@ -60,12 +135,10 @@ def WFS(maze_list, start_pos, dot, type_of_search):
     else:
         frontier_pos = []
         frontier_node = []
-    frontier_pos.append(starting_node.getPosition())
+    frontier_pos.append(starting_node.get_position())
     frontier_node.append(starting_node)
     explored = []
     while (frontier_pos):
-        print("Number of nodes visited: " + str(len(explored)))
-        print("Frontier size: " + str(len(frontier_pos)))
         if type_of_search == "BFS":
             top_frontier_pos = frontier_pos[0]
             top_frontier_node = frontier_node[0]
@@ -75,57 +148,64 @@ def WFS(maze_list, start_pos, dot, type_of_search):
             top_frontier_pos = frontier_pos.pop()
             top_frontier_node = frontier_node.pop()
         explored.append(top_frontier_pos)
-        children = getChildren(top_frontier_pos)
+        children = get_children(top_frontier_pos, maze_list)
 
         for loc in children:
             child = Node(loc, top_frontier_node, 1 +
-                         top_frontier_node.getPathCost())
+                         top_frontier_node.get_path_cost())
 
-            if not (isInExplored(child.getPosition(), explored) or isInExplored(child.getPosition(), frontier_pos)):
-                print("CHILD: " + child.getPosition().printPos() +
-                      " DOT: " + dot.getPosition().printPos())
-
-                if (child.getPosition().__eq__(dot.getPosition())):
-                    print("SUCCESS")
-                    return 1 + top_frontier_node.getPathCost()
-                frontier_pos.append(child.getPosition())
+            if not (is_in_explored(child.get_position(), explored) or is_in_explored(child.get_position(), frontier_pos)):
+                if (child.get_position().equals(dot.get_position())):
+                    return child
+                frontier_pos.append(child.get_position())
                 frontier_node.append(child)
+    return None
 
 
-def main():
-    file_name = "mediumMaze.txt"
+def setup_maze(file_name, dot_list):
+    """ Function that sets up maze by populating maze_list, dot_list and start_pos
 
-    maze_list = None
-    dot_list = []
+    Args:
+        file_name: name of file that contains the unsolved maze
+        dot_list: list containing the positions of the dots
+    Returns:
+        Tuple containing
+        maze_list: the 2-D maze that stores the maze  
+        start_pos: the starting position of the maze
 
-    state = None
-    start_pos = None
-
+    """
     with open(file_name) as textFile:
         maze_list = [[str(c) for c in line.rstrip()] for line in textFile]
 
-    print(len(maze_list))
     for i in range(len(maze_list)):
         for j in range(len(maze_list[i])):
             if (maze_list[i][j] == 'P'):
                 start_pos = Position(i, j)
             elif (maze_list[i][j] == '.'):
                 dot_list.append(Dot(Position(i, j)))
+    return maze_list, start_pos
 
-    global numRows
-    global numCols
-    numRows = len(maze_list)
-    numCols = len(maze_list[0])
-    for dot in dot_list:
-        print("Dot row: " + str(dot.getPosition().getRow()) +
-              " Dot col: " + str(dot.getPosition().getCol()))
 
-    print("Start row: " + str(start_pos.getRow()) +
-          " Start col: " + str(start_pos.getCol()))
+def main():
+
+    file_name = "bigMaze.txt"
+
+    dot_list = []
+
+    maze_list, start_pos = setup_maze(file_name, dot_list)
+
+    global num_rows
+    global num_cols
+    num_rows = len(maze_list)
+    num_cols = len(maze_list[0])
 
     # input BFS or DFS
-    search = "BFS"
-    print(WFS(maze_list, start_pos, dot_list[0], search))
+    search = "DFS"
+    cur_node = (WFS(maze_list, start_pos, dot_list[0], search))
+    while cur_node:
+        add_path_to_solution(maze_list, cur_node)
+        cur_node = cur_node.get_parent()
+    print_maze_to_file(maze_list, "out_DFS.txt")
 
 
 if __name__ == '__main__':

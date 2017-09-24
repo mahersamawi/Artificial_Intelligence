@@ -1,4 +1,12 @@
-class Node:
+class Node(object):
+    """Node class that contains the parent node, the node's location and cost
+
+    Attributes:
+        position (Position object): Position object for the Node
+        parent (Node object): Parent node of the node
+        path_cost (int): Cost to get to this node from the starting node
+
+    """
     position = None
     parent = None
     path_cost = None
@@ -8,20 +16,20 @@ class Node:
         self.parent = parent
         self.path_cost = path_cost
 
-    def getPosition(self):
+    def get_position(self):
         return self.position
 
-    def setPosition(position):
+    def set_position(position):
         self.position = position
 
-    def getParent(self):
+    def get_parent(self):
         return self.parent
 
-    def setParent(parent):
+    def set_parent(parent):
         self.parent = parent
 
-    def getPathCost(self):
+    def get_path_cost(self):
         return self.path_cost
 
-    def setPathCost(path_cost):
+    def set_path_cost(path_cost):
         self.path_cost = path_cost

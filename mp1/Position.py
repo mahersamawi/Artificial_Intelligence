@@ -1,4 +1,9 @@
-class Position:
+class Position(object):
+    """Attributes:
+        row (int): row location of the object
+        column (int): column location of the object
+
+    """
     row = None
     column = None
 
@@ -6,23 +11,23 @@ class Position:
         self.row = row
         self.column = column
 
-    def __eq__(self, other):
-        return self.row == other.getRow() and self.column == other.getCol()
+    def equals(self, other):
+        return self.row == other.get_row() and self.column == other.get_col()
 
     def __neq__(self, other):
-        return self.row != other.getRow() and self.column != other.getCol()
+        return self.row != other.get_row() and self.column != other.get_col()
 
-    def printPos(self):
+    def print_pos(self):
         return "Row: " + str(self.row) + " Col: " + str(self.column)
 
-    def getRow(self):
+    def get_row(self):
         return self.row
 
-    def getCol(self):
+    def get_col(self):
         return self.column
 
-    def setRow(self, row):
+    def set_row(self, row):
         self.row = row
 
-    def setCol(self, y):
+    def set_col(self, y):
         self.column = column
