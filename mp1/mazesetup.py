@@ -37,11 +37,11 @@ def print_maze_to_file(maze, out_file):
         Nothing
 
     """
-    with open(out_file, "w") as textFile:
+    with open(out_file, "w") as text_file:
         for i in range(len(maze)):
             for j in range(len(maze[i])):
-                textFile.write(maze[i][j])
-            textFile.write("\n")
+                text_file.write(maze[i][j])
+            text_file.write("\n")
 
 
 def pos_is_valid(pos, maze_list):
@@ -174,8 +174,8 @@ def setup_maze(file_name, dot_list):
         start_pos: the starting position of the maze
 
     """
-    with open(file_name) as textFile:
-        maze_list = [[str(c) for c in line.rstrip()] for line in textFile]
+    with open(file_name) as text_file:
+        maze_list = [[str(c) for c in line.rstrip()] for line in text_file]
 
     for i in range(len(maze_list)):
         for j in range(len(maze_list[i])):
@@ -187,13 +187,9 @@ def setup_maze(file_name, dot_list):
 
 
 def main():
-
     file_name = "bigMaze.txt"
-
     dot_list = []
-
     maze_list, start_pos = setup_maze(file_name, dot_list)
-
     global num_rows
     global num_cols
     num_rows = len(maze_list)
