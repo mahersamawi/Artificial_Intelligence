@@ -1,4 +1,6 @@
 import queue
+import sys
+
 from heapq import *
 from Dot import *
 from Position import *
@@ -263,8 +265,17 @@ def setup_maze(file_name, dot_list):
     return maze_list, start_pos
 
 
+def loop_through_solution(sol_node, maze_list):
+    while sol_node:
+        add_path_to_solution(maze_list, sol_node)
+        sol_node = sol_node.get_parent()
+
+
 def main():
-    file_name = "mediumMaze.txt"
+    # pass in the maze and the type of search to run
+    file_name = sys.argv[1]
+    search_type = sys.argv[2]
+
     dot_list = []
     maze_list, start_pos = setup_maze(file_name, dot_list)
     global num_rows
@@ -272,16 +283,37 @@ def main():
     num_rows = len(maze_list)
     num_cols = len(maze_list[0])
 
-    # input BFS or DFS
-    search = "BFS"
-    # sol_node = WFS(maze_list, start_pos, dot_list[0], search)
+    if (search_type == "all"):
+        for i in ["BFS", "DFS"]:
+            maze_list, start_pos = setup_maze(file_name, dot_list)
+            sol_node = WFS(maze_list, start_pos, dot_list[0], i)
+            loop_through_solution(sol_node, maze_list)
+            print_maze_to_file(maze_list, str(i) + "_sol_" + file_name)
 
-    sol_node = greedy_search(maze_list, start_pos, dot_list[0], True)
-    while sol_node:
-        add_path_to_solution(maze_list, sol_node)
-        sol_node = sol_node.get_parent()
-    print_maze_to_file(maze_list, "out_a_star_mediumMaze.txt")
+        maze_list, start_pos = setup_maze(file_name, dot_list)
+        sol_node = greedy_search(maze_list, start_pos, dot_list[0], False)
+        loop_through_solution(sol_node, maze_list)
+        print_maze_to_file(maze_list, "greedy" + "_sol_" + file_name)
 
+        maze_list, start_pos = setup_maze(file_name, dot_list)
+        sol_node = greedy_search(maze_list, start_pos, dot_list[0], True)
+        loop_through_solution(sol_node, maze_list)
+        print_maze_to_file(maze_list, "a_star" + "_sol_" + file_name)
+
+    if (search_type == "BFS" or search_type == " DFS"):
+        sol_node = WFS(maze_list, start_pos, dot_list[0], search_type)
+        loop_through_solution(sol_node, maze_list)
+        print_maze_to_file(maze_list, str(search_type) + "_sol_" + file_name)
+
+    if (search_type == "greedy"):
+        sol_node = greedy_search(maze_list, start_pos, dot_list[0], False)
+        loop_through_solution(sol_node, maze_list)
+        print_maze_to_file(maze_list, "greedy" + "_sol_" + file_name)
+
+    if (search_type == "a_star"):
+        sol_node = greedy_search(maze_list, start_pos, dot_list[0], True)
+        loop_through_solution(sol_node, maze_list)
+        print_maze_to_file(maze_list, "a_star" + "_sol_" + file_name)
 
 if __name__ == '__main__':
     main()
