@@ -1,5 +1,5 @@
 import queue
-
+from heapq import *
 from Dot import *
 from Position import *
 from Node import *
@@ -13,7 +13,7 @@ def add_path_to_solution(maze, cur_node):
     """Puts the "." in the maze for the solution path
 
     Args:
-        maze: the 2-D maze 
+        maze: the 2-D maze
         cur_node: the node whose position will be marked with "." in the maze
     Returns:
         Nothing
@@ -31,7 +31,7 @@ def print_maze_to_file(maze, out_file):
     """Prints the maze to file
 
     Args:
-        maze: the 2-D maze 
+        maze: the 2-D maze
         out_file: the name of the file to write to
     Returns:
         Nothing
@@ -49,7 +49,7 @@ def pos_is_valid(pos, maze_list):
 
     Args:
         pos: the position to check if it is valid
-        maze_list: the 2-D maze 
+        maze_list: the 2-D maze
     Returns:
         True: if the position is a valid one
         False: Otherwise
@@ -65,11 +65,11 @@ def pos_is_valid(pos, maze_list):
 
 
 def get_children(pos, maze_list):
-    """Get the children/neighbor positions and if they are valid, append them to the children list 
+    """Get the children/neighbor positions and if they are valid, append them to the children list
 
     Args:
         pos: the position to check if it is valid
-        maze_list: the 2-D maze 
+        maze_list: the 2-D maze
     Returns:
         children: list containing valid neighbors for that position
 
@@ -94,8 +94,8 @@ def get_children(pos, maze_list):
     return children
 
 
-def is_in_explored(pos, explored):
-    """Checks to see if pos is in the explored list by comparing the row and column 
+def is_in_explored(pos, explored, queue=False):
+    """Checks to see if pos is in the explored list by comparing the row and column
         of each position rather than the objects
 
     Args:
@@ -106,6 +106,12 @@ def is_in_explored(pos, explored):
         False: Otherwise
 
     """
+    if queue:
+        for loc in explored:
+            if loc[1].equals(pos):
+                return True
+        return False
+
     for loc in explored:
         if loc.equals(pos):
             return True
@@ -113,13 +119,13 @@ def is_in_explored(pos, explored):
 
 
 def WFS(maze_list, start_pos, dot, type_of_search):
-    """ Function that runs DFS(stack) or BFS(queue) on the maze_list 
+    """ Function that runs DFS(stack) or BFS(queue) on the maze_list
 
     Args:
-        maze_list: the 2-D maze 
+        maze_list: the 2-D maze
         start_pos: the starting position
         dot: the position of the dot to find
-        type_of_search: BFS or DFS depending on the search 
+        type_of_search: BFS or DFS depending on the search
 
     Returns:
         child: node that is the path to the dot from the starting position
@@ -162,6 +168,77 @@ def WFS(maze_list, start_pos, dot, type_of_search):
     return None
 
 
+def calc_manhattan_dist(pos1, pos2):
+    """ Function that calculates the manhattan distance of 2 positions
+
+    Args:
+        pos1: The position of the first point
+        pos2: The position of the second point
+
+    Returns:
+        The manhattan distance of the 2 positions
+
+    """
+    pos1_row = pos1.get_row()
+    pos1_col = pos1.get_col()
+
+    pos2_row = pos2.get_row()
+    pos2_col = pos2.get_col()
+
+    return (abs(pos1_col - pos2_col) + abs(pos1_row - pos2_row))
+
+
+def greedy_search(maze_list, start_pos, dot, a_star=False):
+    """ Function that runs greedy or a star on the maze_list
+
+    Args:
+        maze_list: the 2-D maze
+        start_pos: the starting position
+        dot: the position of the dot to find
+        a_star: False if greedy, True if a_star
+
+    Returns:
+        child: node that is the path to the dot from the starting position
+        None: Otherwise
+
+    """
+    starting_node = Node(start_pos, None, 0)
+    if (starting_node.get_position().equals(dot.get_position())):
+        return 0
+
+    frontier_pos = []
+    frontier_node = []
+    first_dist = calc_manhattan_dist(
+        starting_node.get_position(), dot.get_position())
+    first_tuple = (first_dist, starting_node.get_position())
+    heappush(frontier_pos, first_tuple)
+    heappush(frontier_node, (first_dist, starting_node))
+    explored = []
+    while (frontier_pos):
+        top_frontier_pos = heappop(frontier_pos)[1]
+        top_frontier_node = heappop(frontier_node)[1]
+        explored.append(top_frontier_pos)
+        children = get_children(top_frontier_pos, maze_list)
+        # Loop through the children
+        for loc in children:
+            child_cost = 1 + top_frontier_node.get_path_cost()
+            child = Node(loc, top_frontier_node, child_cost)
+            if not (is_in_explored(child.get_position(), explored) or is_in_explored(child.get_position(), frontier_pos, True)):
+                if (child.get_position().equals(dot.get_position())):
+                    return child
+                # Add the path cost to the dist
+                if a_star:
+                    child_dist = calc_manhattan_dist(
+                        child.get_position(), dot.get_position()) + child_cost
+                else:
+                    child_dist = calc_manhattan_dist(
+                        child.get_position(), dot.get_position())
+                child_tuple = (child_dist, child.get_position())
+                heappush(frontier_pos, child_tuple)
+                heappush(frontier_node, (child_dist, child))
+    return None
+
+
 def setup_maze(file_name, dot_list):
     """ Function that sets up maze by populating maze_list, dot_list and start_pos
 
@@ -187,7 +264,7 @@ def setup_maze(file_name, dot_list):
 
 
 def main():
-    file_name = "bigMaze.txt"
+    file_name = "mediumMaze.txt"
     dot_list = []
     maze_list, start_pos = setup_maze(file_name, dot_list)
     global num_rows
@@ -196,12 +273,14 @@ def main():
     num_cols = len(maze_list[0])
 
     # input BFS or DFS
-    search = "DFS"
-    cur_node = (WFS(maze_list, start_pos, dot_list[0], search))
-    while cur_node:
-        add_path_to_solution(maze_list, cur_node)
-        cur_node = cur_node.get_parent()
-    print_maze_to_file(maze_list, "out_DFS.txt")
+    search = "BFS"
+    # sol_node = WFS(maze_list, start_pos, dot_list[0], search)
+
+    sol_node = greedy_search(maze_list, start_pos, dot_list[0], True)
+    while sol_node:
+        add_path_to_solution(maze_list, sol_node)
+        sol_node = sol_node.get_parent()
+    print_maze_to_file(maze_list, "out_a_star_mediumMaze.txt")
 
 
 if __name__ == '__main__':
