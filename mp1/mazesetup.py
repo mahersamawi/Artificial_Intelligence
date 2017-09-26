@@ -110,12 +110,12 @@ def is_in_explored(pos, explored, queue=False):
     """
     if queue:
         for loc in explored:
-            if loc[1].equals(pos):
+            if loc[1] == pos:
                 return True
         return False
 
     for loc in explored:
-        if loc.equals(pos):
+        if loc == (pos):
             return True
     return False
 
@@ -135,7 +135,7 @@ def WFS(maze_list, start_pos, dot, type_of_search):
 
     """
     starting_node = Node(start_pos, None, 0)
-    if (starting_node.get_position().equals(dot.get_position())):
+    if (starting_node.get_position() == (dot.get_position())):
         return 0
     if type_of_search == "BFS":
         frontier_pos = deque([])
@@ -163,7 +163,7 @@ def WFS(maze_list, start_pos, dot, type_of_search):
                          top_frontier_node.get_path_cost())
 
             if not (is_in_explored(child.get_position(), explored) or is_in_explored(child.get_position(), frontier_pos)):
-                if (child.get_position().equals(dot.get_position())):
+                if (child.get_position() == dot.get_position()):
                     return child
                 frontier_pos.append(child.get_position())
                 frontier_node.append(child)
@@ -205,7 +205,7 @@ def greedy_search(maze_list, start_pos, dot, a_star=False):
 
     """
     starting_node = Node(start_pos, None, 0)
-    if (starting_node.get_position().equals(dot.get_position())):
+    if (starting_node.get_position() == (dot.get_position())):
         return 0
 
     frontier_pos = []
@@ -226,7 +226,7 @@ def greedy_search(maze_list, start_pos, dot, a_star=False):
             child_cost = 1 + top_frontier_node.get_path_cost()
             child = Node(loc, top_frontier_node, child_cost)
             if not (is_in_explored(child.get_position(), explored) or is_in_explored(child.get_position(), frontier_pos, True)):
-                if (child.get_position().equals(dot.get_position())):
+                if (child.get_position() == dot.get_position()):
                     return child
                 # Add the path cost to the dist
                 if a_star:
