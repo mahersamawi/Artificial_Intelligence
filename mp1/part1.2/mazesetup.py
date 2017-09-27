@@ -63,35 +63,24 @@ def get_children(current_node_state, maze_list):
     return children
 
 
-def is_in_explored(pos, explored, queue=False):
-    """Checks to see if pos is in the explored list by comparing the row and column
-        of each position rather than the objects
-
-    Args:
-        pos: the position to check if it is valid
-        explored: list of visited positions
-    Returns:
-        True: if the position is in the explored list
-        False: Otherwise
-
-    """
-    if queue:
-        for loc in explored:
-            if loc[1] == pos:
-                return True
-        return False
-
-    for loc in explored:
-        if loc == (pos):
-            return True
-    return False
-
-
 def check_in_frontier(node_to_check, frontier):
     for node in frontier:
         if node_to_check.get_node_state() == node.get_node_state():
             return True
     return False
+
+def add_to_frontier(type_of_search, obj_to_add, frontier):
+    if type_of_search == "BFS":
+        frontier.append(obj_to_add)
+
+
+def get_from_frontier(type_of_search, frontier):
+    if type_of_search == "BFS":
+        top_frontier_node = frontier[0]
+        frontier.popleft()
+        return top_frontier_node
+    else:
+        return frontier.pop()
 
 
 def WFS(maze_list, start_pos, dot):
@@ -112,11 +101,10 @@ def WFS(maze_list, start_pos, dot):
     starting_node = Node(State(start_pos, dot_len), None, 0)
     sol_path = []
     frontier = deque([])
-    frontier.append(starting_node)
+    add_to_frontier("BFS", starting_node, frontier)
     explored = {}
     while (frontier):
-        frontier_node = frontier[0]
-        frontier.popleft()
+        frontier_node = get_from_frontier("BFS", frontier)
         explored[frontier_node.get_node_state()] = 1
         children = get_children(frontier_node.get_node_state(), maze_list)
 
@@ -131,7 +119,7 @@ def WFS(maze_list, start_pos, dot):
                     dot_len -= 1
                     if dot_len == 0:
                         return sol_path
-                frontier.append(child)
+                add_to_frontier("BFS", child, frontier)
     return None
 
 
@@ -142,14 +130,11 @@ def goal_test(current_node):
 
 def calc_manhattan_dist(pos1, pos2):
     """ Function that calculates the manhattan distance of 2 positions
-
     Args:
         pos1: The position of the first point
         pos2: The position of the second point
-
     Returns:
         The manhattan distance of the 2 positions
-
     """
     pos1_row = pos1.get_row()
     pos1_col = pos1.get_col()
@@ -159,58 +144,50 @@ def calc_manhattan_dist(pos1, pos2):
 
     return (abs(pos1_col - pos2_col) + abs(pos1_row - pos2_row))
 
+def calc_heuristic(child, dot, child_cost, a_star=False):
+    if a_star:
+         return (calc_manhattan_dist(child.get_position(), dot.get_position()) + child_cost)
+    else:
+        return (calc_manhattan_dist(child.get_position(), dot.get_position()))
+
 
 # TODO
 def greedy_search(maze_list, start_pos, dot, a_star=False):
     """ Function that runs greedy or a star on the maze_list
-
     Args:
         maze_list: the 2-D maze
         start_pos: the starting position
         dot: the position of the dot to find
         a_star: False if greedy, True if a_star
-
     Returns:
         child: node that is the path to the dot from the starting position
         None: Otherwise
-
     """
     starting_node = Node(start_pos, None, 0)
-    if (starting_node.get_position() == (dot.get_position())):
-        return 0
 
     frontier = []
-    frontier_node = []
-    first_dist = calc_manhattan_dist(
-        starting_node.get_position(), dot.get_position())
-    first_tuple = (first_dist, starting_node.get_position())
+    first_dist = calc_manhattan_dist(starting_node.get_position(), dot.get_position())
+    first_tuple = (first_dist, starting_node)
     heappush(frontier, first_tuple)
-    heappush(frontier_node, (first_dist, starting_node))
     explored = []
     while (frontier):
-        frontier = heappop(frontier)[1]
-        frontier_node = heappop(frontier_node)[1]
-        explored.append(frontier)
-        children = get_children(frontier, maze_list)
+        top_frontier_node = heappop(frontier)[1]
+        top_frontier_pos = top_frontier_node.get_position()
+        
+        explored.append(top_frontier_node)
+        children = get_children(top_frontier_pos, maze_list)
         # Loop through the children
         for loc in children:
-            child_cost = 1 + frontier_node.get_path_cost()
-            child = Node(loc, frontier_node, child_cost)
+            child_cost = 1 + top_frontier_node.get_path_cost()
+            child = Node(loc, top_frontier_node, child_cost)
             if not (is_in_explored(child.get_position(), explored) or is_in_explored(child.get_position(), frontier, True)):
                 if (child.get_position() == dot.get_position()):
                     return child
                 # Add the path cost to the dist
-                if a_star:
-                    child_dist = calc_manhattan_dist(
-                        child.get_position(), dot.get_position()) + child_cost
-                else:
-                    child_dist = calc_manhattan_dist(
-                        child.get_position(), dot.get_position())
-                child_tuple = (child_dist, child.get_position())
+                child_dist = calc_heuristic(child, dot, child_cost, a_star)
+                child_tuple = (child_dist, child)
                 heappush(frontier, child_tuple)
-                heappush(frontier_node, (child_dist, child))
     return None
-
 
 def loop_through_solution(sol_path, maze_list):
     count = 1
