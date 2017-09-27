@@ -33,6 +33,7 @@ def print_maze_to_file(maze, out_file):
     Returns:
         Nothing
     """
+    out_file = "../solved_mazes/" + out_file
     with open(out_file, "w") as text_file:
         for i in range(len(maze)):
             for j in range(len(maze[i])):

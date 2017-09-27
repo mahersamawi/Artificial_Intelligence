@@ -70,14 +70,29 @@ def is_in_explored(pos, explored, queue=False):
     """
     if queue:
         for loc in explored:
-            if loc[1] == pos:
+            if loc[1].get_position() == pos:
                 return True
         return False
 
     for loc in explored:
-        if loc == (pos):
+        if loc.get_position() == pos:
             return True
     return False
+
+def add_to_frontier(type_of_search, obj_to_add, frontier):
+    if type_of_search == "BFS" or type_of_search == "DFS":
+        frontier.append(obj_to_add)
+
+
+def get_from_frontier(type_of_search, frontier):
+    if type_of_search == "BFS":
+        top_frontier_node = frontier[0]
+        frontier.popleft()
+        return top_frontier_node
+    else:
+        return frontier.pop()
+
+
 
 
 def WFS(maze_list, start_pos, dot, type_of_search):
@@ -92,38 +107,27 @@ def WFS(maze_list, start_pos, dot, type_of_search):
         None: Otherwise
     """
     starting_node = Node(start_pos, None, 0)
-    if (starting_node.get_position() == (dot.get_position())):
-        return 0
     if type_of_search == "BFS":
-        frontier_pos = deque([])
-        frontier_node = deque([])
+        frontier = deque([])
     else:
-        frontier_pos = []
-        frontier_node = []
-    frontier_pos.append(starting_node.get_position())
-    frontier_node.append(starting_node)
+        frontier = []
+
+    add_to_frontier(type_of_search, starting_node, frontier)
     explored = []
-    while (frontier_pos):
-        if type_of_search == "BFS":
-            top_frontier_pos = frontier_pos[0]
-            top_frontier_node = frontier_node[0]
-            frontier_pos.popleft()
-            frontier_node.popleft()
-        else:
-            top_frontier_pos = frontier_pos.pop()
-            top_frontier_node = frontier_node.pop()
-        explored.append(top_frontier_pos)
+    while (frontier):
+        top_frontier_node = get_from_frontier(type_of_search, frontier)
+        top_frontier_pos = top_frontier_node.get_position()
+        explored.append(top_frontier_node)
         children = get_children(top_frontier_pos, maze_list)
 
         for loc in children:
             child = Node(loc, top_frontier_node, 1 +
                          top_frontier_node.get_path_cost())
 
-            if not (is_in_explored(child.get_position(), explored) or is_in_explored(child.get_position(), frontier_pos)):
+            if not (is_in_explored(child.get_position(), explored) or is_in_explored(child.get_position(), frontier)):
                 if (child.get_position() == dot.get_position()):
                     return child
-                frontier_pos.append(child.get_position())
-                frontier_node.append(child)
+                frontier.append(child)
     return None
 
 
@@ -143,6 +147,13 @@ def calc_manhattan_dist(pos1, pos2):
 
     return (abs(pos1_col - pos2_col) + abs(pos1_row - pos2_row))
 
+def calc_heuristic(child, dot, child_cost, a_star=False):
+    if a_star:
+         return (calc_manhattan_dist(child.get_position(), dot.get_position()) + child_cost)
+    else:
+        return (calc_manhattan_dist(child.get_position(), dot.get_position()))
+
+
 
 def greedy_search(maze_list, start_pos, dot, a_star=False):
     """ Function that runs greedy or a star on the maze_list
@@ -156,39 +167,29 @@ def greedy_search(maze_list, start_pos, dot, a_star=False):
         None: Otherwise
     """
     starting_node = Node(start_pos, None, 0)
-    if (starting_node.get_position() == (dot.get_position())):
-        return 0
 
-    frontier_pos = []
-    frontier_node = []
-    first_dist = calc_manhattan_dist(
-        starting_node.get_position(), dot.get_position())
-    first_tuple = (first_dist, starting_node.get_position())
-    heappush(frontier_pos, first_tuple)
-    heappush(frontier_node, (first_dist, starting_node))
+    frontier = []
+    first_dist = calc_manhattan_dist(starting_node.get_position(), dot.get_position())
+    first_tuple = (first_dist, starting_node)
+    heappush(frontier, first_tuple)
     explored = []
-    while (frontier_pos):
-        top_frontier_pos = heappop(frontier_pos)[1]
-        top_frontier_node = heappop(frontier_node)[1]
-        explored.append(top_frontier_pos)
+    while (frontier):
+        top_frontier_node = heappop(frontier)[1]
+        top_frontier_pos = top_frontier_node.get_position()
+        
+        explored.append(top_frontier_node)
         children = get_children(top_frontier_pos, maze_list)
         # Loop through the children
         for loc in children:
             child_cost = 1 + top_frontier_node.get_path_cost()
             child = Node(loc, top_frontier_node, child_cost)
-            if not (is_in_explored(child.get_position(), explored) or is_in_explored(child.get_position(), frontier_pos, True)):
+            if not (is_in_explored(child.get_position(), explored) or is_in_explored(child.get_position(), frontier, True)):
                 if (child.get_position() == dot.get_position()):
                     return child
                 # Add the path cost to the dist
-                if a_star:
-                    child_dist = calc_manhattan_dist(
-                        child.get_position(), dot.get_position()) + child_cost
-                else:
-                    child_dist = calc_manhattan_dist(
-                        child.get_position(), dot.get_position())
-                child_tuple = (child_dist, child.get_position())
-                heappush(frontier_pos, child_tuple)
-                heappush(frontier_node, (child_dist, child))
+                child_dist = calc_heuristic(child, dot, child_cost, a_star)
+                child_tuple = (child_dist, child)
+                heappush(frontier, child_tuple)
     return None
 
 
@@ -215,32 +216,32 @@ def main():
             maze_list, start_pos = setup_maze(file_name, dot_list)
             sol_node = WFS(maze_list, start_pos, dot_list[0], i)
             loop_through_solution(sol_node, maze_list)
-            print_maze_to_file(maze_list, str(i) + "_sol_" + file_name)
+            print_maze_to_file(maze_list, str(i) + "1.1_sol_" + file_name.split("/")[-1])
 
         maze_list, start_pos = setup_maze(file_name, dot_list)
         sol_node = greedy_search(maze_list, start_pos, dot_list[0], False)
         loop_through_solution(sol_node, maze_list)
-        print_maze_to_file(maze_list, "greedy" + "_sol_" + file_name)
+        print_maze_to_file(maze_list, "greedy" + "1.1_sol_" + file_name.split("/")[-1])
 
         maze_list, start_pos = setup_maze(file_name, dot_list)
         sol_node = greedy_search(maze_list, start_pos, dot_list[0], True)
         loop_through_solution(sol_node, maze_list)
-        print_maze_to_file(maze_list, "a_star" + "_sol_" + file_name)
+        print_maze_to_file(maze_list, "a_star" + "1.1_sol_" + file_name.split("/")[-1])
 
-    if (search_type == "BFS" or search_type == " DFS"):
+    if (search_type == "BFS" or search_type == "DFS"):
         sol_node = WFS(maze_list, start_pos, dot_list[0], search_type)
         loop_through_solution(sol_node, maze_list)
-        print_maze_to_file(maze_list, str(search_type) + "_sol_" + file_name)
+        print_maze_to_file(maze_list, str(search_type) + "1.1_sol_" + file_name.split("/")[-1])
 
     if (search_type == "greedy"):
         sol_node = greedy_search(maze_list, start_pos, dot_list[0], False)
         loop_through_solution(sol_node, maze_list)
-        print_maze_to_file(maze_list, "greedy" + "_sol_" + file_name)
+        print_maze_to_file(maze_list, str(search_type) + "1.1_sol_" + file_name.split("/")[-1])
 
     if (search_type == "a_star"):
         sol_node = greedy_search(maze_list, start_pos, dot_list[0], True)
         loop_through_solution(sol_node, maze_list)
-        print_maze_to_file(maze_list, "a_star" + "_sol_" + file_name)
+        print_maze_to_file(maze_list, str(search_type) + "1.1_sol_" + file_name.split("/")[-1])
 
 if __name__ == '__main__':
     main()

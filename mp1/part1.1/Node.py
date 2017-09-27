@@ -20,17 +20,17 @@ class Node(object):
     def get_position(self):
         return self.position
 
-    def set_position(position):
+    def set_position(self, position):
         self.position = position
 
     def get_parent(self):
         return self.parent
 
-    def set_parent(parent):
+    def set_parent(self, parent):
         self.parent = parent
 
     def get_path_cost(self):
         return self.path_cost
 
-    def set_path_cost(path_cost):
+    def set_path_cost(self, path_cost):
         self.path_cost = path_cost
