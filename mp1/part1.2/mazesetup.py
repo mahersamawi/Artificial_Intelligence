@@ -102,17 +102,17 @@ def WFS(maze_list, start_pos, dot):
     sol_path = []
     frontier = deque([])
     add_to_frontier("BFS", starting_node, frontier)
-    explored = {}
+    explored = []
     while (frontier):
         frontier_node = get_from_frontier("BFS", frontier)
-        explored[frontier_node.get_node_state()] = 1
+        explored.append(frontier_node)
         children = get_children(frontier_node.get_node_state(), maze_list)
 
         for loc in children:
             child = Node(State(loc, dot_len), frontier_node, 1 +
                          frontier_node.get_path_cost())
 
-            if not (explored.get(child.get_node_state(), None) or check_in_frontier(child, frontier)):
+            if not (check_in_frontier(child, explored) or check_in_frontier(child, frontier)):
                 if (child.get_node_state().get_position() in dot):
                     dot.remove(child.get_node_state().get_position())
                     sol_path.append(child)
@@ -190,15 +190,16 @@ def greedy_search(maze_list, start_pos, dot, a_star=False):
     return None
 
 def loop_through_solution(sol_path, maze_list):
-    count = 1
+    cost = 0
     for i in sol_path:
+        cost += i.get_path_cost()
         while i:
             # Pipe into file to get the order of nodes
             add_path_to_solution(maze_list, i)
-            i.get_node_state().get_position().print_pos()
-            print(count)
+            #i.get_node_state().get_position().print_pos()
+            #print(count)
             i = i.get_parent()
-            count += 1
+    print ("Cost is " + str(cost))
 
 
 def main():
@@ -215,7 +216,6 @@ def main():
 
     if (search_type == "BFS"):
         sol_path = WFS(maze_list, start_pos, dot_list)
-        print(len(sol_path))
         loop_through_solution(sol_path, maze_list)
         print_maze_to_file(maze_list, str(search_type) + "1.2_sol_" + file_name.split("/")[-1])
 
