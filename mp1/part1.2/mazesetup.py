@@ -94,14 +94,13 @@ def check_in_frontier(node_to_check, frontier):
     return False
 
 
-def WFS(maze_list, start_pos, dot, type_of_search):
+def WFS(maze_list, start_pos, dot):
     """ Function that runs DFS(stack) or BFS(queue) on the maze_list
 
     Args:
         maze_list: the 2-D maze
         start_pos: the starting position
         dot: the position of the dot to find
-        type_of_search: BFS or DFS depending on the search
 
     Returns:
         child: node that is the path to the dot from the starting position
@@ -112,19 +111,12 @@ def WFS(maze_list, start_pos, dot, type_of_search):
 
     starting_node = Node(State(start_pos, dot_len), None, 0)
     sol_path = []
-    print ("Number of dots is " + str(dot_len))
-    if type_of_search == "BFS":
-        frontier = deque([])
-    else:
-        frontier = []
+    frontier = deque([])
     frontier.append(starting_node)
     explored = {}
     while (frontier):
-        if type_of_search == "BFS":
-            frontier_node = frontier[0]
-            frontier.popleft()
-        else:
-            frontier_node = frontier.pop()
+        frontier_node = frontier[0]
+        frontier.popleft()
         explored[frontier_node.get_node_state()] = 1
         children = get_children(frontier_node.get_node_state(), maze_list)
 
@@ -136,11 +128,8 @@ def WFS(maze_list, start_pos, dot, type_of_search):
                 if (child.get_node_state().get_position() in dot):
                     dot.remove(child.get_node_state().get_position())
                     sol_path.append(child)
-                    child.get_node_state().get_position().print_pos()
                     dot_len -= 1
                     if dot_len == 0:
-                        print ("Len of explored is: " + str(len(explored)))
-                        print ("Len of frontier is: " + str(len(frontier)))
                         return sol_path
                 frontier.append(child)
     return None
@@ -171,6 +160,7 @@ def calc_manhattan_dist(pos1, pos2):
     return (abs(pos1_col - pos2_col) + abs(pos1_row - pos2_row))
 
 
+# TODO
 def greedy_search(maze_list, start_pos, dot, a_star=False):
     """ Function that runs greedy or a star on the maze_list
 
@@ -223,17 +213,21 @@ def greedy_search(maze_list, start_pos, dot, a_star=False):
 
 
 def loop_through_solution(sol_path, maze_list):
+    count = 1
     for i in sol_path:
         while i:
+            # Pipe into file to get the order of nodes
             add_path_to_solution(maze_list, i)
+            i.get_node_state().get_position().print_pos()
+            print(count)
             i = i.get_parent()
+            count += 1
 
 
 def main():
     # pass in the maze and the type of search to run
     file_name = sys.argv[1]
     search_type = sys.argv[2]
-    print(search_type)
 
     dot_list = []
     maze_list, start_pos = setup_maze(file_name, dot_list)
@@ -241,41 +235,17 @@ def main():
     global num_cols
     num_rows = len(maze_list)
     num_cols = len(maze_list[0])
-    print (search_type)
 
-    if (search_type == "all"):
-        for i in ["BFS", "DFS"]:
-            maze_list, start_pos = setup_maze(file_name, dot_list)
-            sol_node = WFS(maze_list, start_pos, dot_list, i)
-            loop_through_solution(sol_node, maze_list)
-            print_maze_to_file(maze_list, str(i) + "_sol_" + file_name)
-
-        maze_list, start_pos = setup_maze(file_name, dot_list)
-        sol_node = greedy_search(maze_list, start_pos, dot_list, False)
-        loop_through_solution(sol_node, maze_list)
-        print_maze_to_file(maze_list, "greedy" + "_sol_" + file_name)
-
-        maze_list, start_pos = setup_maze(file_name, dot_list)
-        sol_node = greedy_search(maze_list, start_pos, dot_list, True)
-        loop_through_solution(sol_node, maze_list)
-        print_maze_to_file(maze_list, "a_star" + "_sol_" + file_name)
-
-    if (search_type == "DFS" or search_type == "BFS"):
-        print("her")
-        sol_path = WFS(maze_list, start_pos, dot_list, search_type)
-        print (len(sol_path))
+    if (search_type == "BFS"):
+        sol_path = WFS(maze_list, start_pos, dot_list)
+        print(len(sol_path))
         loop_through_solution(sol_path, maze_list)
-        print_maze_to_file(maze_list, str(search_type) + "_sol_" + file_name)
-
-    if (search_type == "greedy"):
-        sol_node = greedy_search(maze_list, start_pos, dot_list, False)
-        loop_through_solution(sol_node, maze_list)
-        print_maze_to_file(maze_list, "greedy" + "_sol_" + file_name)
+        print_maze_to_file(maze_list, str(search_type) + "1.2_sol_" + file_name.split("/")[-1])
 
     if (search_type == "a_star"):
         sol_node = greedy_search(maze_list, start_pos, dot_list, True)
         loop_through_solution(sol_node, maze_list)
-        print_maze_to_file(maze_list, "a_star" + "_sol_" + file_name)
+        print_maze_to_file(maze_list, str(search_type) + "1.2_sol_" + file_name.split("/")[-1])
 
 if __name__ == '__main__':
     main()
