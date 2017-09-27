@@ -63,7 +63,7 @@ def get_children(current_node_state, maze_list):
     return children
 
 
-def check_in_frontier(node_to_check, frontier):
+def check_in_list(node_to_check, frontier):
     for node in frontier:
         if node_to_check.get_node_state() == node.get_node_state():
             return True
@@ -112,7 +112,7 @@ def WFS(maze_list, start_pos, dot):
             child = Node(State(loc, dot_len), frontier_node, 1 +
                          frontier_node.get_path_cost())
 
-            if not (check_in_frontier(child, explored) or check_in_frontier(child, frontier)):
+            if not (check_in_list(child, explored) or check_in_list(child, frontier)):
                 if (child.get_node_state().get_position() in dot):
                     dot.remove(child.get_node_state().get_position())
                     sol_path.append(child)
