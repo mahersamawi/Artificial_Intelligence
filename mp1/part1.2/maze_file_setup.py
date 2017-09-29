@@ -55,6 +55,7 @@ def add_path_to_solution(maze, cur_node):
         Nothing
 
     """
+    
     for i in range(len(maze)):
         for j in range(len(maze[i])):
             row = cur_node.get_node_state().get_position().get_row()

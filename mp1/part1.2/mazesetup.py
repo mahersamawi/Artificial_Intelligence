@@ -193,12 +193,20 @@ def loop_through_solution(sol_path, maze_list):
     cost = 0
     for i in sol_path:
         cost += i.get_path_cost()
+        parent = i
         while i:
             # Pipe into file to get the order of nodes
             add_path_to_solution(maze_list, i)
             #i.get_node_state().get_position().print_pos()
             #print(count)
             i = i.get_parent()
+
+    ind = 0
+    for parent in sol_path:
+        row = parent.get_node_state().get_position().get_row()
+        col = parent.get_node_state().get_position().get_col()
+        maze_list[row][col] = str(ind+1)
+        ind += 1
     print ("Cost is " + str(cost))
 
 
