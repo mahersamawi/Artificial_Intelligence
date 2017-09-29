@@ -79,6 +79,7 @@ def is_in_explored(pos, explored, queue=False):
             return True
     return False
 
+
 def add_to_frontier(type_of_search, obj_to_add, frontier):
     if type_of_search == "BFS" or type_of_search == "DFS":
         frontier.append(obj_to_add)
@@ -91,8 +92,6 @@ def get_from_frontier(type_of_search, frontier):
         return top_frontier_node
     else:
         return frontier.pop()
-
-
 
 
 def WFS(maze_list, start_pos, dot, type_of_search):
@@ -147,12 +146,12 @@ def calc_manhattan_dist(pos1, pos2):
 
     return (abs(pos1_col - pos2_col) + abs(pos1_row - pos2_row))
 
+
 def calc_heuristic(child, dot, child_cost, a_star=False):
     if a_star:
-         return (calc_manhattan_dist(child.get_position(), dot.get_position()) + child_cost)
+        return (calc_manhattan_dist(child.get_position(), dot.get_position()) + child_cost)
     else:
         return (calc_manhattan_dist(child.get_position(), dot.get_position()))
-
 
 
 def greedy_search(maze_list, start_pos, dot, a_star=False):
@@ -169,14 +168,14 @@ def greedy_search(maze_list, start_pos, dot, a_star=False):
     starting_node = Node(start_pos, None, 0)
 
     frontier = []
-    first_dist = calc_manhattan_dist(starting_node.get_position(), dot.get_position())
+    first_dist = calc_heuristic(starting_node, dot, 0, a_star)
     first_tuple = (first_dist, starting_node)
     heappush(frontier, first_tuple)
     explored = []
     while (frontier):
         top_frontier_node = heappop(frontier)[1]
         top_frontier_pos = top_frontier_node.get_position()
-        
+
         explored.append(top_frontier_node)
         children = get_children(top_frontier_pos, maze_list)
         # Loop through the children
@@ -194,6 +193,7 @@ def greedy_search(maze_list, start_pos, dot, a_star=False):
 
 
 def loop_through_solution(sol_node, maze_list):
+    print("Cost is: " + str(sol_node.get_path_cost()))
     while sol_node:
         add_path_to_solution(maze_list, sol_node)
         sol_node = sol_node.get_parent()
@@ -216,32 +216,38 @@ def main():
             maze_list, start_pos = setup_maze(file_name, dot_list)
             sol_node = WFS(maze_list, start_pos, dot_list[0], i)
             loop_through_solution(sol_node, maze_list)
-            print_maze_to_file(maze_list, str(i) + "1.1_sol_" + file_name.split("/")[-1])
+            print_maze_to_file(maze_list, str(
+                i) + "1.1_sol_" + file_name.split("/")[-1])
 
         maze_list, start_pos = setup_maze(file_name, dot_list)
         sol_node = greedy_search(maze_list, start_pos, dot_list[0], False)
         loop_through_solution(sol_node, maze_list)
-        print_maze_to_file(maze_list, "greedy" + "1.1_sol_" + file_name.split("/")[-1])
+        print_maze_to_file(maze_list, "greedy" +
+                           "1.1_sol_" + file_name.split("/")[-1])
 
         maze_list, start_pos = setup_maze(file_name, dot_list)
         sol_node = greedy_search(maze_list, start_pos, dot_list[0], True)
         loop_through_solution(sol_node, maze_list)
-        print_maze_to_file(maze_list, "a_star" + "1.1_sol_" + file_name.split("/")[-1])
+        print_maze_to_file(maze_list, "a_star" +
+                           "1.1_sol_" + file_name.split("/")[-1])
 
     if (search_type == "BFS" or search_type == "DFS"):
         sol_node = WFS(maze_list, start_pos, dot_list[0], search_type)
         loop_through_solution(sol_node, maze_list)
-        print_maze_to_file(maze_list, str(search_type) + "1.1_sol_" + file_name.split("/")[-1])
+        print_maze_to_file(maze_list, str(search_type) +
+                           "1.1_sol_" + file_name.split("/")[-1])
 
     if (search_type == "greedy"):
         sol_node = greedy_search(maze_list, start_pos, dot_list[0], False)
         loop_through_solution(sol_node, maze_list)
-        print_maze_to_file(maze_list, str(search_type) + "1.1_sol_" + file_name.split("/")[-1])
+        print_maze_to_file(maze_list, str(search_type) +
+                           "1.1_sol_" + file_name.split("/")[-1])
 
     if (search_type == "a_star"):
         sol_node = greedy_search(maze_list, start_pos, dot_list[0], True)
         loop_through_solution(sol_node, maze_list)
-        print_maze_to_file(maze_list, str(search_type) + "1.1_sol_" + file_name.split("/")[-1])
+        print_maze_to_file(maze_list, str(search_type) +
+                           "1.1_sol_" + file_name.split("/")[-1])
 
 if __name__ == '__main__':
     main()

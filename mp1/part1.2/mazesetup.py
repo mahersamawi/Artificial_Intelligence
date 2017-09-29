@@ -83,7 +83,7 @@ def get_from_frontier(type_of_search, frontier):
         return frontier.pop()
 
 
-def WFS(maze_list, start_pos, dot):
+def WFS(maze_list, start_pos, dot, type_of_search):
     """ Function that runs DFS(stack) or BFS(queue) on the maze_list
 
     Args:
@@ -96,12 +96,9 @@ def WFS(maze_list, start_pos, dot):
         None: Otherwise
 
     """
-    dot_len = len(dot)
-
-    starting_node = Node(State(start_pos, dot_len), None, 0)
-    sol_path = []
+    starting_node = Node(State(start_pos, dot), None, 0)
     frontier = deque([])
-    add_to_frontier("BFS", starting_node, frontier)
+    add_to_frontier(type_of_search, starting_node, frontier)
     explored = []
     while (frontier):
         frontier_node = get_from_frontier("BFS", frontier)
@@ -109,19 +106,25 @@ def WFS(maze_list, start_pos, dot):
         children = get_children(frontier_node.get_node_state(), maze_list)
 
         for loc in children:
-            child = Node(State(loc, dot_len), frontier_node, 1 +
+            num_dots_left = frontier_node.get_node_state().get_number_of_dots_left()
+            parent_dot_list = frontier_node.get_node_state().get_list_of_dots_left()
+
+            print ("Parent dot list length: " + str(num_dots_left))
+            child = Node(State(loc, parent_dot_list), frontier_node, 1 +
                          frontier_node.get_path_cost())
 
             if not (check_in_list(child, explored) or check_in_list(child, frontier)):
                 if (child.get_node_state().get_position() in dot):
-                    dot.remove(child.get_node_state().get_position())
-                    sol_path.append(child)
-                    dot_len -= 1
-                    if dot_len == 0:
-                        return sol_path
+                    dot_found_pos = child.get_node_state().get_position()
+                    child.get_node_state().remove_dot(dot_found_pos)
+                    if child.get_node_state().get_number_of_dots_left() == 0:
+                        # print( "Explored in loop: " + str (len(explored)))
+                        # for i in explored:
+                        #     i.print_node_state()
+                        return child
                 add_to_frontier("BFS", child, frontier)
+    print(len(explored))
     return None
-
 
 def goal_test(current_node):
     # check if the current node state number of dots is 0
@@ -189,26 +192,15 @@ def greedy_search(maze_list, start_pos, dot, a_star=False):
                 heappush(frontier, child_tuple)
     return None
 
-def loop_through_solution(sol_path, maze_list):
-    cost = 0
-    for i in sol_path:
-        cost += i.get_path_cost()
-        parent = i
-        while i:
-            # Pipe into file to get the order of nodes
-            add_path_to_solution(maze_list, i)
-            #i.get_node_state().get_position().print_pos()
-            #print(count)
-            i = i.get_parent()
+def loop_through_solution(sol_node, maze_list):
 
-    ind = 0
-    for parent in sol_path:
-        row = parent.get_node_state().get_position().get_row()
-        col = parent.get_node_state().get_position().get_col()
-        maze_list[row][col] = str(ind+1)
-        ind += 1
-    print ("Cost is " + str(cost))
-
+    while sol_node:
+        # Pipe into file to get the order of nodes
+        add_path_to_solution(maze_list, sol_node)
+        #i.get_node_state().get_position().print_pos()
+        #print(count)
+        sol_node.print_node_state()
+        sol_node = sol_node.get_parent()
 
 def main():
     # pass in the maze and the type of search to run
@@ -223,8 +215,8 @@ def main():
     num_cols = len(maze_list[0])
 
     if (search_type == "BFS"):
-        sol_path = WFS(maze_list, start_pos, dot_list)
-        loop_through_solution(sol_path, maze_list)
+        sol_node = WFS(maze_list, start_pos, dot_list, search_type)
+        loop_through_solution(sol_node, maze_list)
         print_maze_to_file(maze_list, str(search_type) + "1.2_sol_" + file_name.split("/")[-1])
 
     if (search_type == "a_star"):

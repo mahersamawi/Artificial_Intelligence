@@ -11,7 +11,7 @@ class Position(object):
         self.column = column
 
     def __lt__(self, other):
-        return self.row < other.get_row() 
+        return self.column < other.get_col()
 
     def __eq__(self, other):
         return self.row == other.get_row() and self.column == other.get_col()

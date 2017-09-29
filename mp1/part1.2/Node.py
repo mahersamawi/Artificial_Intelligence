@@ -17,7 +17,7 @@ class Node(object):
         self.path_cost = path_cost
 
     def __lt__(self, other):
-        return self.position < other.get_position()
+        return self.path_cost < other.get_path_cost()
 
     def get_node_state(self):
         return self.node_state
@@ -36,3 +36,6 @@ class Node(object):
 
     def set_path_cost(self, path_cost):
         self.path_cost = path_cost
+
+    def print_node_state(self):
+        self.node_state.print_state()
