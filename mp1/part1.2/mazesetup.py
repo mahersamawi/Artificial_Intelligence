@@ -120,8 +120,8 @@ def WFS(maze_list, start_pos, dot_list, type_of_search):
     explored = []
     while (frontier):
         # print("Starting loop")
-        print("Explored length: " + str(len(explored)))
-        print("Frontier length: " + str(len(frontier)))
+        # print("Explored length: " + str(len(explored)))
+        # print("Frontier length: " + str(len(frontier)))
         # print("Printing explored: ")
         # for i in explored:
         #     i.print_node_state()
@@ -223,11 +223,14 @@ def greedy_search(maze_list, start_pos, dot, a_star=False):
                 heappush(frontier, child_tuple)
     return None
 
-def loop_through_solution(sol_node, maze_list):
-
+def loop_through_solution(sol_node, maze_list, dot_list):
+    dot_ind = len(dot_list)
+    print("dot list length: " + str(dot_ind))
     while sol_node:
         # Pipe into file to get the order of nodes
-        add_path_to_solution(maze_list, sol_node)
+        if sol_node.get_node_state().get_position() in dot_list:
+            add_path_to_solution(maze_list, sol_node, dot_ind)
+            dot_ind -= 1
         #i.get_node_state().get_position().print_pos()
         #print(count)
         #sol_node.print_node_state()
@@ -247,7 +250,7 @@ def main():
 
     if (search_type == "BFS"):
         sol_node = WFS(maze_list, start_pos, dot_list, search_type)
-        loop_through_solution(sol_node, maze_list)
+        loop_through_solution(sol_node, maze_list, dot_list)
         print_maze_to_file(maze_list, str(search_type) + "1.2_sol_" + file_name.split("/")[-1])
 
     if (search_type == "a_star"):

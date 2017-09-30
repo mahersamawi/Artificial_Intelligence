@@ -45,7 +45,7 @@ def print_maze_to_file(maze, out_file):
             text_file.write("\n")
 
 
-def add_path_to_solution(maze, cur_node):
+def add_path_to_solution(maze, cur_node, ind):
     """Puts the "." in the maze for the solution path
 
     Args:
@@ -55,10 +55,8 @@ def add_path_to_solution(maze, cur_node):
         Nothing
 
     """
+    row = cur_node.get_node_state().get_position().get_row()
+    col = cur_node.get_node_state().get_position().get_col()
     
-    for i in range(len(maze)):
-        for j in range(len(maze[i])):
-            row = cur_node.get_node_state().get_position().get_row()
-            col = cur_node.get_node_state().get_position().get_col()
-            if i == row and j == col:
-                maze[i][j] = "."
+    maze[row][col] = str(ind)
+    
