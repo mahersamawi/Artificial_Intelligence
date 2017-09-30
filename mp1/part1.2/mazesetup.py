@@ -75,15 +75,13 @@ def add_to_frontier(type_of_search, obj_to_add, frontier):
 
 
 def get_from_frontier(type_of_search, frontier):
-    if type_of_search == "BFS":
-        top_frontier_node = frontier[0]
-        frontier.popleft()
-        return top_frontier_node
+    if type_of_search == "BFS":    
+        return frontier.popleft()
     else:
         return frontier.pop()
 
 
-def WFS(maze_list, start_pos, dot, type_of_search):
+def WFS(maze_list, start_pos, dot_list, type_of_search):
     """ Function that runs DFS(stack) or BFS(queue) on the maze_list
 
     Args:
@@ -96,7 +94,8 @@ def WFS(maze_list, start_pos, dot, type_of_search):
         None: Otherwise
 
     """
-    starting_node = Node(State(start_pos, dot), None, 0)
+    starting_node = Node(State(start_pos, dot_list), None, 0)
+    
     frontier = deque([])
     add_to_frontier(type_of_search, starting_node, frontier)
     explored = []
@@ -114,7 +113,7 @@ def WFS(maze_list, start_pos, dot, type_of_search):
                          frontier_node.get_path_cost())
 
             if not (check_in_list(child, explored) or check_in_list(child, frontier)):
-                if (child.get_node_state().get_position() in dot):
+                if (child.get_node_state().get_position() in dot_list):
                     dot_found_pos = child.get_node_state().get_position()
                     child.get_node_state().remove_dot(dot_found_pos)
                     if child.get_node_state().get_number_of_dots_left() == 0:
@@ -199,7 +198,7 @@ def loop_through_solution(sol_node, maze_list):
         add_path_to_solution(maze_list, sol_node)
         #i.get_node_state().get_position().print_pos()
         #print(count)
-        sol_node.print_node_state()
+        #sol_node.print_node_state()
         sol_node = sol_node.get_parent()
 
 def main():
