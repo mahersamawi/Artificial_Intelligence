@@ -12,17 +12,26 @@ class State(object):
         return self.position < other.get_position()
 
     def __eq__(self, other):
-        if self.position != other.get_position():
-            return False
-        
-        for i in self.list_of_dots_left:
-            for j in other.get_list_of_dots_left():
-                if i != j:
-                    return False
-        return True
+        if isinstance(other, self.__class__):
+            if self.position != other.get_position():
+                return False
+            if self.get_number_of_dots_left() != other.get_number_of_dots_left():
+                return False   
 
-    def __hash__(self):
-        return hash(str(self))
+            list1 = self.list_of_dots_left
+            list2 = other.get_list_of_dots_left()
+            for i in range(0, len(list1)):
+                for j in range(0, len(list2)):
+                    if (list1[i] == list2[j]):
+                        break
+                    if (j == (len(list2) - 1)):
+
+                        return False
+            # print("States are the same!")
+            return True
+        else:
+            print("State objects not the same!")
+            return False
 
     def get_position(self):
         return self.position
@@ -40,8 +49,15 @@ class State(object):
         self.list_of_dots_left = copy.deepcopy(dot_list)
 
     def print_state(self):
+        print("Current position: ") 
         self.position.print_pos()
-        print(self.list_of_dots_left)
+        print("\n")
+        print("Dot list: ")
+        for i in self.list_of_dots_left:
+            print(" Dot: ", end="")
+            i.print_pos()
+        print("\n")
+
 
     def remove_dot(self, pos):
         for i in self.list_of_dots_left:

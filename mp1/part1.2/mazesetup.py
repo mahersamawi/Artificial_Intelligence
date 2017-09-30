@@ -63,9 +63,13 @@ def get_children(current_node_state, maze_list):
     return children
 
 
-def check_in_list(node_to_check, frontier):
-    for node in frontier:
-        if node_to_check.get_node_state() == node.get_node_state():
+def check_in_list(node_to_check, l):
+    # for node in l:
+    #     if node_to_check.get_node_state() == node.get_node_state():
+    #         return True
+    for i in range(len(l)):
+        if (l[i].get_node_state() == node_to_check.get_node_state()):
+            # print("found duplicate! returning true")
             return True
     return False
 
@@ -80,6 +84,21 @@ def get_from_frontier(type_of_search, frontier):
     else:
         return frontier.pop()
 
+
+def check_dup(l):
+    list_length = len(l)
+    for i in range(list_length):
+        for j in range(list_length):
+            if (i != j and l[i].get_node_state() == l[j].get_node_state()):
+                print("Printing duplicates...")
+                l[i].print_node_state()
+                l[j].print_node_state()
+                if(check_in_list(l[i], l)):
+                    print("Success")
+                else:
+                    print("Failure")
+                return True
+    return False
 
 def WFS(maze_list, start_pos, dot_list, type_of_search):
     """ Function that runs DFS(stack) or BFS(queue) on the maze_list
@@ -100,28 +119,41 @@ def WFS(maze_list, start_pos, dot_list, type_of_search):
     add_to_frontier(type_of_search, starting_node, frontier)
     explored = []
     while (frontier):
+        # print("Starting loop")
+        print("Explored length: " + str(len(explored)))
+        print("Frontier length: " + str(len(frontier)))
+        # print("Printing explored: ")
+        # for i in explored:
+        #     i.print_node_state()
+        # print("Printing frontier: ")
+        # for i in frontier:
+        #     i.print_node_state()
         frontier_node = get_from_frontier("BFS", frontier)
         explored.append(frontier_node)
         children = get_children(frontier_node.get_node_state(), maze_list)
 
         for loc in children:
+
             num_dots_left = frontier_node.get_node_state().get_number_of_dots_left()
             parent_dot_list = frontier_node.get_node_state().get_list_of_dots_left()
 
-            print ("Parent dot list length: " + str(num_dots_left))
             child = Node(State(loc, parent_dot_list), frontier_node, 1 +
                          frontier_node.get_path_cost())
-
+            
             if not (check_in_list(child, explored) or check_in_list(child, frontier)):
                 if (child.get_node_state().get_position() in dot_list):
                     dot_found_pos = child.get_node_state().get_position()
+                    
                     child.get_node_state().remove_dot(dot_found_pos)
+
                     if child.get_node_state().get_number_of_dots_left() == 0:
                         # print( "Explored in loop: " + str (len(explored)))
                         # for i in explored:
                         #     i.print_node_state()
+                        # print("success!")
                         return child
                 add_to_frontier("BFS", child, frontier)
+        # print("Ending loop")
     print(len(explored))
     return None
 

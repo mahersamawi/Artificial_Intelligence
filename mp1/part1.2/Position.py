@@ -15,16 +15,17 @@ class Position(object):
         return self.row < other.get_row() 
 
     def __eq__(self, other):
-        return self.row == other.get_row() and self.column == other.get_col()
-
-    def __hash__(self):
-        return hash(str(self))
+        if isinstance(other, self.__class__):
+            return self.row == other.get_row() and self.column == other.get_col()
+        else:
+            print("Position objects not the same!")
+            return False
 
     def __ne__(self, other):
         return self.row != other.get_row() or self.column != other.get_col()
 
     def print_pos(self):
-        print ("Row: " + str(self.row) + " Col: " + str(self.column))
+        print (" Row: " + str(self.row) + " Col: " + str(self.column), end = "")
 
     def get_row(self):
         return self.row
