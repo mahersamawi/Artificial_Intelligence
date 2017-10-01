@@ -6,7 +6,7 @@ class State(object):
 
     def __init__(self, pos, dot_list):
         self.position = pos
-        self.list_of_dots_left = copy.deepcopy(dot_list)
+        self.list_of_dots_left = dot_list[:]
 
     def __lt__(self, other):
         return self.position < other.get_position()
@@ -49,7 +49,7 @@ class State(object):
         return len(self.list_of_dots_left)
 
     def set_list_of_dots_left(self, dot_list):
-        self.list_of_dots_left = copy.deepcopy(dot_list)
+        self.list_of_dots_left = dot_list[:]
 
     def print_state(self):
         print("Current position: ") 

@@ -117,14 +117,15 @@ def WFS(maze_list, start_pos, dot_list, type_of_search):
     starting_node = Node(State(start_pos, dot_list), None, 0)
     
     frontier = deque([])
-    extra_frontier =  deque([])
+    extra_frontier =  {}
     add_to_frontier(type_of_search, starting_node, frontier)
-    add_to_frontier(type_of_search, hash(starting_node), extra_frontier)
+    extra_frontier[hash(starting_node)] = 1 # dict for extra frontier store the path cost instead as the value
     explored = {}
     while (frontier):
         frontier_node = get_from_frontier("BFS", frontier)
-        extra_node = get_from_frontier("BFS", extra_frontier)
-        explored[hash(frontier_node)] = 1
+        frontier_node_hash = hash(frontier_node)
+        extra_frontier.pop(frontier_node_hash, None)
+        explored[frontier_node_hash] = 1
         children = get_children(frontier_node.get_node_state(), maze_list)
 
         for loc in children:
@@ -134,17 +135,17 @@ def WFS(maze_list, start_pos, dot_list, type_of_search):
 
             child = Node(State(loc, parent_dot_list), frontier_node, 1 +
                          frontier_node.get_path_cost())
-            
-            if not ((hash(child) in explored) or hash(child) in extra_frontier):
+            child_hash = hash(child)
+            if not ((child_hash in explored) or child_hash in extra_frontier):
                 if (child.get_node_state().get_position() in dot_list):
                     dot_found_pos = child.get_node_state().get_position()
                     
                     child.get_node_state().remove_dot(dot_found_pos)
-
+                    child_hash = hash(child)
                     if child.get_node_state().get_number_of_dots_left() == 0:
                         return child
                 add_to_frontier("BFS", child, frontier)
-                add_to_frontier("BFS", hash(child), extra_frontier)
+                extra_frontier[hash(child)] = 1
         # print("Ending loop")
     print(len(explored))
     return None
