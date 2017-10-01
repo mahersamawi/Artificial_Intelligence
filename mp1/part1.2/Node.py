@@ -19,6 +19,12 @@ class Node(object):
     def __lt__(self, other):
         return self.path_cost < other.get_path_cost()
 
+    def __eq__(self, other):
+        return (self.node_state == other.get_node_state() and self.path_cost == other.get_path_cost())
+
+    def __hash__(self):
+        return hash((self.node_state, self.path_cost))
+
     def get_node_state(self):
         return self.node_state
 

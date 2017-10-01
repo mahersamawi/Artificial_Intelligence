@@ -17,21 +17,24 @@ class State(object):
                 return False
             if self.get_number_of_dots_left() != other.get_number_of_dots_left():
                 return False   
+            return set(get_list_of_dots_left) == set(other.get_list_of_dots_left())
+            # list1 = self.list_of_dots_left
+            # list2 = other.get_list_of_dots_left()
+            # for i in range(0, len(list1)):
+            #     for j in range(0, len(list2)):
+            #         if (list1[i] == list2[j]):
+            #             break
+            #         if (j == (len(list2) - 1)):
 
-            list1 = self.list_of_dots_left
-            list2 = other.get_list_of_dots_left()
-            for i in range(0, len(list1)):
-                for j in range(0, len(list2)):
-                    if (list1[i] == list2[j]):
-                        break
-                    if (j == (len(list2) - 1)):
-
-                        return False
+            #             return False
             # print("States are the same!")
             return True
         else:
             print("State objects not the same!")
             return False
+
+    def __hash__(self):
+        return hash((self.position, tuple(self.list_of_dots_left)))
 
     def get_position(self):
         return self.position

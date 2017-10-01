@@ -8,7 +8,8 @@ from Node import *
 from State import *
 from maze_file_setup import *
 from collections import deque
-
+import cProfile
+import re
 num_rows = None
 num_cols = None
 
@@ -116,20 +117,14 @@ def WFS(maze_list, start_pos, dot_list, type_of_search):
     starting_node = Node(State(start_pos, dot_list), None, 0)
     
     frontier = deque([])
+    extra_frontier =  deque([])
     add_to_frontier(type_of_search, starting_node, frontier)
-    explored = []
+    add_to_frontier(type_of_search, hash(starting_node), extra_frontier)
+    explored = {}
     while (frontier):
-        # print("Starting loop")
-        # print("Explored length: " + str(len(explored)))
-        # print("Frontier length: " + str(len(frontier)))
-        # print("Printing explored: ")
-        # for i in explored:
-        #     i.print_node_state()
-        # print("Printing frontier: ")
-        # for i in frontier:
-        #     i.print_node_state()
         frontier_node = get_from_frontier("BFS", frontier)
-        explored.append(frontier_node)
+        extra_node = get_from_frontier("BFS", extra_frontier)
+        explored[hash(frontier_node)] = 1
         children = get_children(frontier_node.get_node_state(), maze_list)
 
         for loc in children:
@@ -140,19 +135,16 @@ def WFS(maze_list, start_pos, dot_list, type_of_search):
             child = Node(State(loc, parent_dot_list), frontier_node, 1 +
                          frontier_node.get_path_cost())
             
-            if not (check_in_list(child, explored) or check_in_list(child, frontier)):
+            if not ((hash(child) in explored) or hash(child) in extra_frontier):
                 if (child.get_node_state().get_position() in dot_list):
                     dot_found_pos = child.get_node_state().get_position()
                     
                     child.get_node_state().remove_dot(dot_found_pos)
 
                     if child.get_node_state().get_number_of_dots_left() == 0:
-                        # print( "Explored in loop: " + str (len(explored)))
-                        # for i in explored:
-                        #     i.print_node_state()
-                        # print("success!")
                         return child
                 add_to_frontier("BFS", child, frontier)
+                add_to_frontier("BFS", hash(child), extra_frontier)
         # print("Ending loop")
     print(len(explored))
     return None

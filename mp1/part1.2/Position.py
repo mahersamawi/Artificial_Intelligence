@@ -21,6 +21,9 @@ class Position(object):
             print("Position objects not the same!")
             return False
 
+    def __hash__(self):
+        return hash((self.row, self.column))
+
     def __ne__(self, other):
         return self.row != other.get_row() or self.column != other.get_col()
 
