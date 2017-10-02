@@ -212,22 +212,64 @@ def eval_func(child, dot_list, child_cost):
     # for dot_pos in dot_list:
     #     cur_sum += calc_manhattan_dist(second, dot_pos)
 
-    # New idea part 1
+    # ******************** Idea 1 ************************************************* 
+    # 
+    # Currently our best solution
+    #
+    # *****************************************************************************
+
+
+    # closest_dot = find_closest_dot_to_pos(dot_list_copy, child_pos)
+
+    # closest_dot_dist = calc_manhattan_dist(closest_dot, child_pos)
+
+    # dot_list_copy.remove(closest_dot)
+    # dot_list_copy.insert(0, closest_dot)
+    # ret = child_cost + closest_dot_dist
+    # for dot_pos_ind in range(len(dot_list_copy)):
+    #     if dot_pos_ind + 1 >= len(dot_list_copy):
+    #         break
+    #     ret += calc_manhattan_dist(dot_list_copy[dot_pos_ind],
+    #                                dot_list_copy[dot_pos_ind + 1])
+
+    # ********************** Idea 1.5 *********************************************
+    # 
+    # This didn't help at all, went from 237 to 253 path cost, 7.5 sec to 18 sec execution time
+    #
+    #******************************************************************************
+
     closest_dot = find_closest_dot_to_pos(dot_list_copy, child_pos)
 
     closest_dot_dist = calc_manhattan_dist(closest_dot, child_pos)
+    ret = child_cost + closest_dot_dist
 
     dot_list_copy.remove(closest_dot)
+
+    # if (len(dot_list_copy) > 1):
+    #     closest_second_dot = find_closest_dot_to_pos(dot_list_copy, closest_dot)
+    #     second_dot_dist = calc_manhattan_dist(closest_second_dot, closest_dot)
+    #     ret += second_dot_dist
+
+    #     dot_list_copy.remove(closest_second_dot)
+    #     dot_list_copy.insert(0, closest_second_dot)
+
     dot_list_copy.insert(0, closest_dot)
+
     ret = child_cost + closest_dot_dist
+    i = 0
     for dot_pos_ind in range(len(dot_list_copy)):
-        if dot_pos_ind + 1 >= len(dot_list_copy):
+        if dot_pos_ind + 1 >= len(dot_list_copy) or i > 9: # 9 seems to give best output here
             break
         ret += calc_manhattan_dist(dot_list_copy[dot_pos_ind],
                                    dot_list_copy[dot_pos_ind + 1])
+        i += 1
 
+    # ******************** Idea 2 **************************************************
+    #
+    # This also didn't help; I don't think this ever ended
+    #
+    # ******************************************************************************
 
-    # New idea part 2
     # closest_dot = find_closest_dot_to_pos(dot_list_copy, child_pos)
     # closest_dot_dist = calc_manhattan_dist(closest_dot, child_pos)
     # dot_list_copy.remove(closest_dot)
