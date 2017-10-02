@@ -17,7 +17,7 @@ class State(object):
                 return False
             if self.get_number_of_dots_left() != other.get_number_of_dots_left():
                 return False   
-            return set(get_list_of_dots_left) == set(other.get_list_of_dots_left())
+            return set(self.list_of_dots_left) == set(other.get_list_of_dots_left())
             # list1 = self.list_of_dots_left
             # list2 = other.get_list_of_dots_left()
             # for i in range(0, len(list1)):
