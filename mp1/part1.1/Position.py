@@ -16,8 +16,8 @@ class Position(object):
     def __eq__(self, other):
         return self.row == other.get_row() and self.column == other.get_col()
 
-    def __neq__(self, other):
-        return self.row != other.get_row() and self.column != other.get_col()
+    def __ne__(self, other):
+        return self.row != other.get_row() or self.column != other.get_col()
 
     def print_pos(self):
         print("Row: " + str(self.row) + " Col: " + str(self.column))

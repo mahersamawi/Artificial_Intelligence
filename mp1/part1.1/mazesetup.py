@@ -10,7 +10,7 @@ from collections import deque
 
 num_rows = None
 num_cols = None
-
+nodes_expanded = 0
 
 def pos_is_valid(pos, maze_list):
     """Checks to see if the position is valid and not a wall
@@ -115,6 +115,8 @@ def WFS(maze_list, start_pos, dot, type_of_search):
     explored = []
     while (frontier):
         top_frontier_node = get_from_frontier(type_of_search, frontier)
+        global nodes_expanded
+        nodes_expanded += 1
         top_frontier_pos = top_frontier_node.get_position()
         explored.append(top_frontier_node)
         children = get_children(top_frontier_pos, maze_list)
@@ -174,6 +176,8 @@ def greedy_search(maze_list, start_pos, dot, a_star=False):
     explored = []
     while (frontier):
         top_frontier_node = heappop(frontier)[1]
+        global nodes_expanded
+        nodes_expanded += 1
         top_frontier_pos = top_frontier_node.get_position()
 
         explored.append(top_frontier_node)
@@ -215,24 +219,32 @@ def main():
         for i in ["BFS", "DFS"]:
             maze_list, start_pos = setup_maze(file_name, dot_list)
             sol_node = WFS(maze_list, start_pos, dot_list[0], i)
+            global nodes_expanded
+            print("Nodes expanded for "  +  str(i) + ": "+str(nodes_expanded))
+            nodes_expanded = 0
             loop_through_solution(sol_node, maze_list)
             print_maze_to_file(maze_list, str(
                 i) + "1.1_sol_" + file_name.split("/")[-1])
 
         maze_list, start_pos = setup_maze(file_name, dot_list)
         sol_node = greedy_search(maze_list, start_pos, dot_list[0], False)
+        print("Nodes expanded for greedy: "  + str(nodes_expanded))
+        nodes_expanded = 0
         loop_through_solution(sol_node, maze_list)
         print_maze_to_file(maze_list, "greedy" +
                            "1.1_sol_" + file_name.split("/")[-1])
 
         maze_list, start_pos = setup_maze(file_name, dot_list)
         sol_node = greedy_search(maze_list, start_pos, dot_list[0], True)
+        print("Nodes expanded for a_star: "  + str(nodes_expanded))
+        nodes_expanded = 0
         loop_through_solution(sol_node, maze_list)
         print_maze_to_file(maze_list, "a_star" +
                            "1.1_sol_" + file_name.split("/")[-1])
 
     if (search_type == "BFS" or search_type == "DFS"):
         sol_node = WFS(maze_list, start_pos, dot_list[0], search_type)
+        print("Nodes expanded for "  +  str(search_type) + ": "+str(nodes_expanded))
         loop_through_solution(sol_node, maze_list)
         print_maze_to_file(maze_list, str(search_type) +
                            "1.1_sol_" + file_name.split("/")[-1])
