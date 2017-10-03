@@ -19,6 +19,7 @@ num_cols = None
 distances = {}
 nodes_expanded = 0
 mst_dict = {}
+mst_dict_edge_exists = {}
 
 
 def pos_is_valid(pos, maze_list):
@@ -195,26 +196,28 @@ def eval_func(child, dot_list, child_cost):
     dot_list_copy = dot_list[:]
 
     child_pos = child.get_node_state().get_position()
-    min_value = 999999
+    # print("Number of dots: " + str(len(dot_list)))
     
     closest_dot = find_closest_dot_to_pos(dot_list, child_pos)
     closest_dot_dist = calc_manhattan_dist(closest_dot, child_pos)
     ret = child_cost + closest_dot_dist
+    
 
+    # print("child cost + closest_dot: " + str(ret))
+    
     dot_list_length = len(dot_list_copy)
-    edges_visited = []
-    for i in range(len(dot_list_copy)):
-        for j in range(len(dot_list_copy)):
-            edge = Edge(dot_list_copy[i], dot_list_copy[j])
-            if (i >= len(dot_list_copy) or j >= len(dot_list_copy) or edge in edges_visited):
-                break
-            dist = mst_dict.get((dot_list_copy[i], dot_list_copy[j]), 0)
-            if (dist != 0):
-                edges_visited.append(edge)
-            ret += dist
+    for i in range(dot_list_length):
+        for j in range(dot_list_length):
+            if (mst_dict_edge_exists[(dot_list_copy[i], dot_list_copy[j])] == True):
+                ret += mst_dict[(dot_list_copy[i], dot_list_copy[j])]
+    
+    for dot_pos_ind in range(len(dot_list_copy)):
+        if dot_pos_ind + 1 >= len(dot_list_copy):
+            break
+        ret += calc_manhattan_dist(dot_list_copy[dot_pos_ind], dot_list_copy[dot_pos_ind + 1])
+ 
 
-    # print ("heuristic value is: " + str(ret))
-    # print ("Path Cost: " + str(child_cost))
+    # print ("final heuristic is: " + str(ret))
     return ret
 
 
@@ -297,13 +300,17 @@ def setup_2d_array(dot_list):
             distances[hash((dot_list[i], dot_list[j]))] = man_dist
             distances[hash((dot_list[j], dot_list[i]))] = man_dist
 
-def init_mst_dict(mst_list):
+def init_mst_dict(mst_list, dot_list):
+    for dot in dot_list:
+        for dot2 in dot_list:
+            mst_dict_edge_exists[(dot, dot2)] = False
     global mst_dict
     for edge in mst_list:
         weight = edge.get_weight()
         origin = edge.get_origin()
         dest = edge.get_dest()
         mst_dict[(origin, dest)] = weight
+        mst_dict_edge_exists[(origin, dest)] = True
 
 def main():
     # pass in the maze and the type of search to run
@@ -319,7 +326,7 @@ def main():
 
     # setup_2d_array(dot_list)
 
-    init_mst_dict(get_MST(dot_list))    
+    init_mst_dict(get_MST(dot_list), dot_list)    
 
     if (search_type == "BFS"):
         sol_node = WFS(maze_list, start_pos, dot_list, search_type)

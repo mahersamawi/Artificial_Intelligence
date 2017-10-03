@@ -15,11 +15,10 @@ class Position(object):
         return self.row < other.get_row() 
 
     def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            return self.row == other.get_row() and self.column == other.get_col()
-        else:
-            print("Position objects not the same!")
-            return False
+        return self.row == other.get_row() and self.column == other.get_col()
+        # else:
+        #     print("Position objects not the same!")
+        #     return False
 
     def __hash__(self):
         return hash((self.row, self.column))
