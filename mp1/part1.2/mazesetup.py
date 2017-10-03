@@ -6,13 +6,19 @@ from Dot import *
 from Position import *
 from Node import *
 from State import *
+from MST import *
+from Edge import *
 from maze_file_setup import *
+
 from collections import deque
 import cProfile
 import re
+
 num_rows = None
 num_cols = None
 distances = {}
+nodes_expanded = 0
+mst_dict = {}
 
 
 def pos_is_valid(pos, maze_list):
@@ -127,6 +133,8 @@ def WFS(maze_list, start_pos, dot_list, type_of_search):
     explored = {}
     while (frontier):
         frontier_node = get_from_frontier("BFS", frontier)
+        global nodes_expanded 
+        nodes_expanded += 1
         frontier_node_hash = hash(frontier_node)
         extra_frontier.pop(frontier_node_hash, None)
         explored[frontier_node_hash] = 1
@@ -153,12 +161,6 @@ def WFS(maze_list, start_pos, dot_list, type_of_search):
         # print("Ending loop")
     print(len(explored))
     return None
-
-
-def goal_test(current_node):
-    # check if the current node state number of dots is 0
-    return (current_node.get_node_state().get_number_of_dots_left() == 0)
-
 
 def calc_manhattan_dist(pos1, pos2):
     """ Function that calculates the manhattan distance of 2 positions
@@ -194,101 +196,25 @@ def eval_func(child, dot_list, child_cost):
 
     child_pos = child.get_node_state().get_position()
     min_value = 999999
-    # for dot_pos in dot_list:
-    #     cur_val = calc_manhattan_dist(child_pos, dot_pos)
-    #     if cur_val < min_value:
-    #         min_value = cur_val
-    #         closest_dot = dot_pos
-
-    # for dot_pos in dot_list:
-    #     first = find_closest_dot(dot_list, dot_pos)
-    #     second = find_closest_dot(dot_list, first)
-    # total_dist = calc_manhattan_dist(first, child_pos) + calc_manhattan_dist(first, second)
-    # if min_value > total_dist:
-    #     min_value = total_dist
-
-    # cur_sum = 0
-    # dist_sum = 0
-    # for dot_pos in dot_list:
-    #     cur_sum += calc_manhattan_dist(second, dot_pos)
-
-    # ******************** Idea 1 ************************************************* 
-    # 
-    # Currently our best solution
-    #
-    # *****************************************************************************
-
-
-    # closest_dot = find_closest_dot_to_pos(dot_list_copy, child_pos)
-
-    # closest_dot_dist = calc_manhattan_dist(closest_dot, child_pos)
-
-    # dot_list_copy.remove(closest_dot)
-    # dot_list_copy.insert(0, closest_dot)
-    # ret = child_cost + closest_dot_dist
-    # for dot_pos_ind in range(len(dot_list_copy)):
-    #     if dot_pos_ind + 1 >= len(dot_list_copy):
-    #         break
-    #     ret += calc_manhattan_dist(dot_list_copy[dot_pos_ind],
-    #                                dot_list_copy[dot_pos_ind + 1])
-
-    # ********************** Idea 1.5 *********************************************
-    # 
-    # This didn't help at all, went from 237 to 253 path cost, 7.5 sec to 18 sec execution time
-    #
-    #******************************************************************************
-
-    closest_dot = find_closest_dot_to_pos(dot_list_copy, child_pos)
-
+    
+    closest_dot = find_closest_dot_to_pos(dot_list, child_pos)
     closest_dot_dist = calc_manhattan_dist(closest_dot, child_pos)
     ret = child_cost + closest_dot_dist
 
-    dot_list_copy.remove(closest_dot)
+    dot_list_length = len(dot_list_copy)
+    edges_visited = []
+    for i in range(len(dot_list_copy)):
+        for j in range(len(dot_list_copy)):
+            edge = Edge(dot_list_copy[i], dot_list_copy[j])
+            if (i >= len(dot_list_copy) or j >= len(dot_list_copy) or edge in edges_visited):
+                break
+            dist = mst_dict.get((dot_list_copy[i], dot_list_copy[j]), 0)
+            if (dist != 0):
+                edges_visited.append(edge)
+            ret += dist
 
-    # if (len(dot_list_copy) > 1):
-    #     closest_second_dot = find_closest_dot_to_pos(dot_list_copy, closest_dot)
-    #     second_dot_dist = calc_manhattan_dist(closest_second_dot, closest_dot)
-    #     ret += second_dot_dist
-
-    #     dot_list_copy.remove(closest_second_dot)
-    #     dot_list_copy.insert(0, closest_second_dot)
-
-    dot_list_copy.insert(0, closest_dot)
-
-    ret = child_cost + closest_dot_dist
-    i = 0
-    for dot_pos_ind in range(len(dot_list_copy)):
-        if dot_pos_ind + 1 >= len(dot_list_copy) or i > 9: # 9 seems to give best output here
-            break
-        ret += calc_manhattan_dist(dot_list_copy[dot_pos_ind],
-                                   dot_list_copy[dot_pos_ind + 1])
-        i += 1
-
-    # ******************** Idea 2 **************************************************
-    #
-    # This also didn't help; I don't think this ever ended
-    #
-    # ******************************************************************************
-
-    # closest_dot = find_closest_dot_to_pos(dot_list_copy, child_pos)
-    # closest_dot_dist = calc_manhattan_dist(closest_dot, child_pos)
-    # dot_list_copy.remove(closest_dot)
-    # cur_dot = closest_dot
-    # ret = child_cost + closest_dot_dist
-
-    # while len(dot_list_copy) != 0:
-    #     min_dist = 9999999
-    #     for dot_loc in dot_list_copy:
-    #         cur_dist = distances.get(hash((cur_dot, dot_loc)))
-    #         if cur_dist < min_dist and cur_dist != 0:
-    #             min_dist = cur_dist
-    #             closest_dot = dot_loc
-    #     ret += min_dist
-    #     dot_list_copy.remove(closest_dot)
-    #     cur_dot = closest_dot
-
-    #print ("Final min val is: " + str(ret))
-    #print ("Path Cost: " + str(child_cost))
+    # print ("heuristic value is: " + str(ret))
+    # print ("Path Cost: " + str(child_cost))
     return ret
 
 
@@ -319,7 +245,8 @@ def greedy_search(maze_list, start_pos, dot_list, a_star=False):
         frontier_node = heappop(frontier)[1]
         frontier_node_hash = hash(frontier_node)
         extra_frontier.pop(frontier_node_hash, None)
-
+        global nodes_expanded 
+        nodes_expanded += 1
         explored[frontier_node_hash] = 1
         children = get_children(frontier_node.get_node_state(), maze_list)
         # Loop through the children
@@ -370,6 +297,14 @@ def setup_2d_array(dot_list):
             distances[hash((dot_list[i], dot_list[j]))] = man_dist
             distances[hash((dot_list[j], dot_list[i]))] = man_dist
 
+def init_mst_dict(mst_list):
+    global mst_dict
+    for edge in mst_list:
+        weight = edge.get_weight()
+        origin = edge.get_origin()
+        dest = edge.get_dest()
+        mst_dict[(origin, dest)] = weight
+
 def main():
     # pass in the maze and the type of search to run
     file_name = sys.argv[1]
@@ -382,11 +317,14 @@ def main():
     num_rows = len(maze_list)
     num_cols = len(maze_list[0])
 
-    setup_2d_array(dot_list)
+    # setup_2d_array(dot_list)
+
+    init_mst_dict(get_MST(dot_list))    
 
     if (search_type == "BFS"):
         sol_node = WFS(maze_list, start_pos, dot_list, search_type)
         print ("Path cost: " + str(sol_node.get_path_cost()))
+        print ("Nodes expanded: " + str(nodes_expanded))
         loop_through_solution(sol_node, maze_list, dot_list)
         print_maze_to_file(maze_list, str(search_type) +
                            "1.2_sol_" + file_name.split("/")[-1])
@@ -394,6 +332,7 @@ def main():
     if (search_type == "a_star"):
         sol_node = greedy_search(maze_list, start_pos, dot_list, True)
         print ("Path cost: " + str(sol_node.get_path_cost()))
+        print ("Nodes expanded: " + str(nodes_expanded))
         loop_through_solution(sol_node, maze_list, dot_list)
         print_maze_to_file(maze_list, str(search_type) +
                            "1.2_sol_" + file_name.split("/")[-1])
