@@ -9,7 +9,7 @@ class Cell(object):
     def __init__(self, x, y, color):
         self.pos_x = x
         self.pos_y = y
-        if (color == None):
+        if color is None:
             self.assigned = False
             self.source = False
         else:
@@ -18,7 +18,7 @@ class Cell(object):
             self.color = color
 
     def __str__(self):
-        if self.color == None:
+        if self.color is None:
             return "_"
         return self.color
 

@@ -1,6 +1,6 @@
 from Flowparser import *
 
-grid, colors = parse_flow("./flow_inputs/5x5flow.txt")
+grid, colors, src_dict = parse_flow("./flow_inputs/9x9flow.txt")
 grid_bounds = len(grid[0])
 count = 0
 
@@ -61,7 +61,7 @@ def get_neighbors(cell):
 def check_constraints_all():
     for i in grid:
         for j in i:
-            if check_constraints(j) is False:
+            if check_constraints(j) is False and j.get_assigned() is True:
                 return False
     return True
 
@@ -76,8 +76,8 @@ def check_constraints(cell):
             return True
         return False
     for neighbor in neighbors:
-        if neighbor.is_source() == True:
-            if check_constraints(neighbor) == False:
+        if neighbor.is_source():
+            if check_constraints(neighbor) is False:
                 return False
     if seen_colors.count(current_color) == 2:
         return True
@@ -86,7 +86,6 @@ def check_constraints(cell):
 
 def dumb_solver():
     global count
-    print("Iteration: " + str(count))
     count += 1
 
     if is_complete():
@@ -97,7 +96,7 @@ def dumb_solver():
         prev_assignment = current_cell.get_assigned()
         current_cell.set_color(color)
         current_cell.set_assigned(True)
-        if check_constraints(current_cell):
+        if check_constraints(current_cell) and check_constraints_all():
             result = dumb_solver()
             if result is not False and check_constraints_all():
                 return result
@@ -106,9 +105,35 @@ def dumb_solver():
     return False
 
 
+def get_min_man_dist_src():
+    final_list = []
+    for src_color in src_dict:
+        cur_src_dist = calc_manhattan_dist(src_dict[src_color][0], src_dict[src_color][1])
+        final_list.append((src_dict[src_color][0], cur_src_dist))
+
+    # sort list and return it
+    final_list.sort(key=lambda tup: tup[1], reverse=False)
+
+    return final_list
+
+
+def calc_manhattan_dist(cell1, cell2):
+    """ Function that calculates the manhattan distance of 2 positions
+    Args:
+        cell1: The position of the first point
+        cell2: The position of the second point
+    Returns:
+        The manhattan distance of the 2 positions
+    """
+    cell1_x, cell1_y = cell1.get_position()
+    cell2_x, cell2_y = cell2.get_position()
+    return abs(cell1_x - cell2_x) + abs(cell1_y - cell2_y)
+
+
+
 while True:
     dumb_solver()
     if check_constraints_all() is True:
         break
-
+print("Iteration: " + str(count))
 print_grid()
