@@ -1,8 +1,35 @@
 from Flowparser import *
+import random
 
 grid, colors, src_dict = parse_flow("./flow_inputs/9x9flow.txt")
 grid_bounds = len(grid[0])
 count = 0
+color_domain_dict = {}
+
+
+def setup_man_dist_cell():
+    for i in grid:
+        for j in i:
+            if j.is_source() is False:
+                color_domain_dict[j] = get_closest_colors(j)
+
+
+def get_closest_colors(cur_cell):
+    # find the man dist from cur_cell to all the src cells
+    color_array = []
+    temp_arr = []
+    for i in colors:
+        dist1 = calc_manhattan_dist(cur_cell, src_dict[i][0])
+        dist2 = calc_manhattan_dist(cur_cell, src_dict[i][1])
+        color_array.append((dist1, i))
+        color_array.append((dist2, i))
+
+    color_array.sort(key=lambda tup: tup[0])
+    #print(color_array)
+    for i in color_array:
+        if (i[1]) not in temp_arr:
+            temp_arr.append(i[1])
+    return temp_arr
 
 
 def print_grid():
@@ -20,12 +47,20 @@ def is_complete():
     return True
 
 
-def get_next_cell():
-    for i in grid:
-        for j in i:
-            if j.get_assigned() is False:
-                return j
-    return None
+def get_next_cell(random=False):
+    if random:
+        random_list = []
+        for i in grid:
+            for j in i:
+                if j.get_assigned() is False:
+                    random_list.append(j)
+        return random_list
+    else:
+        for i in grid:
+            for j in i:
+                if j.get_assigned() is False:
+                    return j
+        return None
 
 
 def pos_is_valid(row, col):
@@ -90,8 +125,9 @@ def dumb_solver():
 
     if is_complete():
         return True
-    current_cell = get_next_cell()
-    for color in colors:
+    current_cell = (get_next_cell())
+    current_cell_colors = color_domain_dict[current_cell]
+    for color in current_cell_colors:
         prev_color = current_cell.get_color()
         prev_assignment = current_cell.get_assigned()
         current_cell.set_color(color)
@@ -130,10 +166,11 @@ def calc_manhattan_dist(cell1, cell2):
     return abs(cell1_x - cell2_x) + abs(cell1_y - cell2_y)
 
 
-
-while True:
-    dumb_solver()
-    if check_constraints_all() is True:
-        break
+setup_man_dist_cell()
+# for i in grid:
+#     for j in i:
+#         if j.is_source() is False:
+#             print(color_domain_dict[j])
+dumb_solver()
 print("Iteration: " + str(count))
 print_grid()
