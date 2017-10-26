@@ -1,7 +1,7 @@
 from Flowparser import *
 import random
 
-grid, colors, src_dict = parse_flow("./flow_inputs/9x9flow.txt")
+grid, colors, src_dict = parse_flow("./flow_inputs/8x8flow.txt")
 grid_bounds = len(grid[0])
 count = 0
 color_domain_dict = {}
@@ -18,7 +18,9 @@ def get_closest_colors(cur_cell):
     # find the man dist from cur_cell to all the src cells
     color_array = []
     temp_arr = []
-    for i in colors:
+    # Better results with src_dict
+    # as compared to colors
+    for i in src_dict:
         dist1 = calc_manhattan_dist(cur_cell, src_dict[i][0])
         dist2 = calc_manhattan_dist(cur_cell, src_dict[i][1])
         color_array.append((dist1, i))
@@ -126,6 +128,28 @@ def dumb_solver():
     if is_complete():
         return True
     current_cell = (get_next_cell())
+    current_cell_colors = colors
+    for color in current_cell_colors:
+        prev_color = current_cell.get_color()
+        prev_assignment = current_cell.get_assigned()
+        current_cell.set_color(color)
+        current_cell.set_assigned(True)
+        if check_constraints(current_cell):
+            result = dumb_solver()
+            if result is not False and check_constraints_all():
+                return result
+        current_cell.set_color(prev_color)
+        current_cell.set_assigned(prev_assignment)
+    return False
+
+
+def smart_solver():
+    global count
+    count += 1
+
+    if is_complete():
+        return True
+    current_cell = (get_next_cell())
     current_cell_colors = color_domain_dict[current_cell]
     for color in current_cell_colors:
         prev_color = current_cell.get_color()
@@ -133,7 +157,7 @@ def dumb_solver():
         current_cell.set_color(color)
         current_cell.set_assigned(True)
         if check_constraints(current_cell) and check_constraints_all():
-            result = dumb_solver()
+            result = smart_solver()
             if result is not False and check_constraints_all():
                 return result
         current_cell.set_color(prev_color)
@@ -171,6 +195,6 @@ setup_man_dist_cell()
 #     for j in i:
 #         if j.is_source() is False:
 #             print(color_domain_dict[j])
-dumb_solver()
+smart_solver()
 print("Iteration: " + str(count))
 print_grid()
