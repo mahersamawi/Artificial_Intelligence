@@ -1,4 +1,6 @@
 from Pawn import *
+
+
 class Board(object):
     board_array = None
     white_pawns = []
@@ -23,6 +25,9 @@ class Board(object):
             return "invalid"
         return self.board_array[x][y]
 
+    def get_board(self):
+        return self.board_array
+
     def print_board(self):
         for i in range(8):
             for j in range(8):
@@ -46,6 +51,11 @@ class Board(object):
         self.board_array[dest_tuple[0]][dest_tuple[1]] = pawn
         pawn.set_position(dest_tuple[0], dest_tuple[1])
 
+    def get_white_pawns(self):
+        return self.white_pawns
+
+    def get_black_pawns(self):
+        return self.black_pawns
 
     # moves are strings: up, upleft, upright, down, downleft, downright
     def get_valid_moves(self, pawn):
