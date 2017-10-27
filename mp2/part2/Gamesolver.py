@@ -29,7 +29,6 @@ def minimax():
             # move pawn there
             game_board.move_pawn(pawn, dest_loc)
             v = min_value(1, 3)
-            print("v in minimax is " + str(v))
             v_list.append((pawn, dest_loc, v))
             if prev_pawn is not None:
                 game_board.move_pawn(prev_pawn, prev_pawn.get_position())
@@ -40,7 +39,8 @@ def minimax():
 def max_value(curr_depth, max_depth):
     if curr_depth == max_depth:
         return offensive_heuristic_1("w")
-    v = 0.0
+    infinity = float('inf')
+    v = -infinity
     for pawn in game_board.get_black_pawns():
         for dest_loc in game_board.get_valid_moves(pawn):
             dest_loc_pawn = game_board.get_board()[dest_loc[0]][dest_loc[1]]
@@ -50,19 +50,18 @@ def max_value(curr_depth, max_depth):
             # move pawn there
             game_board.move_pawn(pawn, dest_loc)
             # recurse
-            v = max(v, min_value(curr_depth + 1, max_depth), key=float)
             if prev_pawn is not None:
                 game_board.move_pawn(prev_pawn, prev_pawn.get_position())
-
-    print("max is " + str(v))
-    return v
+            return max(v, min_value(curr_depth + 1, max_depth), key=float)
+    return None
 
 
 def min_value(curr_depth, max_depth):
     if curr_depth == max_depth:
         return offensive_heuristic_1("w")
 
-    v = 1000.0
+    infinity = float('inf')
+    v = infinity
 
     for pawn in game_board.get_white_pawns():
         for dest_loc in game_board.get_valid_moves(pawn):
@@ -73,11 +72,11 @@ def min_value(curr_depth, max_depth):
             # move pawn there
             game_board.move_pawn(pawn, dest_loc)
             # recurse
-            v = min(v, max_value(curr_depth + 1, max_depth), key=float)
             if prev_pawn is not None:
                 game_board.move_pawn(prev_pawn, prev_pawn.get_position())
-    print("min is " + str(v))
-    return v
+            return min(v, max_value(curr_depth + 1, max_depth), key=float)
+    print("should not be here")
+    return None
 
 
 game_board = Board()
@@ -86,6 +85,6 @@ test_pawn = game_board.get_pawn(6, 4)
 moves = game_board.get_valid_moves(test_pawn)
 for move in moves:
     print("Move: " + str(move))
-game_board.move_pawn(test_pawn, (1,1))
+#game_board.move_pawn(test_pawn, (1,1))
 game_board.print_board()
 print(minimax())
