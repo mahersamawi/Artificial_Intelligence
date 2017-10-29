@@ -25,6 +25,7 @@ def print_potential_moves(v_list):
 
 def minimax_black(game_board, max_depth, heuristic):
     v_list = []
+    game_board.update_arrays()
     for pawn in game_board.get_black_pawns():
         pawn_x, pawn_y = pawn.get_position()
         # print("pawn location: (" + str(pawn_x) + ", " + str(pawn_y) + ")")
@@ -54,6 +55,7 @@ def minimax_black(game_board, max_depth, heuristic):
 
 def minimax_white(game_board, max_depth, heuristic):
     v_list = []
+    game_board.update_arrays()
     for pawn in game_board.get_white_pawns():
         pawn_x, pawn_y = pawn.get_position()
         for dest_loc in game_board.get_valid_moves(pawn):

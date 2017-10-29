@@ -29,11 +29,11 @@ def check_win_conditions():
     return True
 
 def move_black(heuristic):
-    current_pawn, dest, val = minimax_black(game_board, 2, heuristic)
+    current_pawn, dest, val = minimax_black(game_board, 3, heuristic)
     game_board.move_pawn(current_pawn, dest)
 
 def move_white(heuristic):
-    current_pawn, dest, val = minimax_white(game_board, 2, heuristic)
+    current_pawn, dest, val = minimax_white(game_board, 3, heuristic)
     game_board.move_pawn(current_pawn, dest)
 
 game_running = True
