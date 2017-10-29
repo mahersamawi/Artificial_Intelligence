@@ -5,7 +5,7 @@ from random import *
 
 def defensive_heuristic_1(game_board, color):
     num_pawns_rem = game_board.get_number_of_pawns(color)
-    return 2 * num_pawns_rem
+    return 2 * num_pawns_rem + random()
 
 
 def offensive_heuristic_1(game_board, color):
@@ -25,12 +25,10 @@ def print_potential_moves(v_list):
 
 def minimax_black(game_board, max_depth, heuristic):
     v_list = []
-    count = 0
     for pawn in game_board.get_black_pawns():
         pawn_x, pawn_y = pawn.get_position()
         # print("pawn location: (" + str(pawn_x) + ", " + str(pawn_y) + ")")
         for dest_loc in game_board.get_valid_moves(pawn):
-            # game_board.update_arrays()
             # print("pawn destination: (" + str(dest_loc[0]) + ", " + str(dest_loc[1]) + ")")
             if (pawn_x == 1):
                 return (pawn, dest_loc, float('inf'))
@@ -47,36 +45,35 @@ def minimax_black(game_board, max_depth, heuristic):
             v = min_value(game_board, 1, max_depth, "b", heuristic)
             # print("v in minimax is " + str(v))
             v_list.append((pawn, dest_loc, v))
-            if prev_pawn is not None:
-                print("Prev pawn is not none in minimax_black")
-                game_board.move_pawn(prev_pawn, prev_pawn_position)
             game_board.move_pawn(pawn, (pawn_x, pawn_y))
+            if prev_pawn is not None:
+                # print("putting pawn of color " + prev_pawn.get_color() + " back in min_Value at " + prev_pawn.get_position_str())
+                game_board.move_pawn(prev_pawn, prev_pawn_position)
     # print_potential_moves(v_list)
     return max(v_list, key=lambda x: x[2])
 
 def minimax_white(game_board, max_depth, heuristic):
     v_list = []
-    count = 0
     for pawn in game_board.get_white_pawns():
         pawn_x, pawn_y = pawn.get_position()
         for dest_loc in game_board.get_valid_moves(pawn):
-            # game_board.update_arrays()
-            if (pawn_x == 1):
-                return (pawn, valid_moves[0], -1 * float('inf'))
+            if (pawn_x == 6):
+                return (pawn, dest_loc, -1 * float('inf'))
             dest_loc_pawn = game_board.get_board()[dest_loc[0]][dest_loc[1]]
             prev_pawn = None
             if dest_loc_pawn is not None:
-                print("wtf shouldnt be here")
                 prev_pawn = dest_loc_pawn
                 prev_pawn_position = prev_pawn.get_position()
             # move pawn there
             game_board.move_pawn(pawn, dest_loc)
-            v = min_value(game_board, 1, max_depth, "w", heuristic)
+            v = max_value(game_board, 1, max_depth, "w", heuristic)
             # print("v in minimax is " + str(v))
             v_list.append((pawn, dest_loc, v))
             game_board.move_pawn(pawn, (pawn_x, pawn_y))
             if prev_pawn is not None:
                 game_board.move_pawn(prev_pawn, prev_pawn_position)
+    # print_potential_moves(v_list)
+    return max(v_list, key=lambda x: x[2])
 
 def max_value(game_board, curr_depth, max_depth, parent_color, parent_heuristic):
     if curr_depth == max_depth:
@@ -87,14 +84,17 @@ def max_value(game_board, curr_depth, max_depth, parent_color, parent_heuristic)
     
     infinity = float('inf')
     v = -infinity
-    for pawn in game_board.get_black_pawns():
+    if parent_color == "b":
+        current_pieces_max = game_board.get_black_pawns()
+    else:
+        current_pieces_max = game_board.get_white_pawns()
+    for pawn in current_pieces_max:
         pawn_x, pawn_y = pawn.get_position()
         for dest_loc in game_board.get_valid_moves(pawn):
-            # game_board.update_arrays()
             dest_loc_pawn = game_board.get_board()[dest_loc[0]][dest_loc[1]]
             prev_pawn = None
             if dest_loc_pawn is not None:
-                print("Dest pawn is not none")
+                # print("Dest pawn is not none")
                 prev_pawn = dest_loc_pawn
                 prev_pawn_position = prev_pawn.get_position()
             # move pawn there
@@ -103,7 +103,7 @@ def max_value(game_board, curr_depth, max_depth, parent_color, parent_heuristic)
             v = max(v, min_value(game_board, curr_depth + 1, max_depth, parent_color, parent_heuristic), key=float)
             game_board.move_pawn(pawn, (pawn_x, pawn_y))
             if prev_pawn is not None:
-                print("putting pawn back at " + prev_pawn.get_position_str())
+                # print("putting pawn back at " + prev_pawn.get_position_str())
                 game_board.move_pawn(prev_pawn, prev_pawn_position)
 
     # print("max is " + str(v))
@@ -119,11 +119,15 @@ def min_value(game_board, curr_depth, max_depth, parent_color, parent_heuristic)
 
     infinity = float('inf')
     v = infinity
+    
 
-    for pawn in game_board.get_white_pawns():
+    if parent_color == "b":
+        current_pieces_min = game_board.get_white_pawns()
+    else:
+        current_pieces_min = game_board.get_black_pawns()
+    for pawn in current_pieces_min:
         pawn_x, pawn_y = pawn.get_position()
         for dest_loc in game_board.get_valid_moves(pawn):
-            # game_board.update_arrays()
             dest_loc_pawn = game_board.get_board()[dest_loc[0]][dest_loc[1]]
             prev_pawn = None
             prev_pawn_position = None
@@ -136,7 +140,7 @@ def min_value(game_board, curr_depth, max_depth, parent_color, parent_heuristic)
             v = min(v, max_value(game_board, curr_depth + 1, max_depth, parent_color, parent_heuristic), key=float)
             game_board.move_pawn(pawn, (pawn_x, pawn_y))
             if prev_pawn is not None:
-                # print("putting pawn back at " + prev_pawn.get_position_str())
+                # print("putting pawn of color " + prev_pawn.get_color() + " back in min_Value at " + prev_pawn.get_position_str())
                 game_board.move_pawn(prev_pawn, prev_pawn_position)
     # print("min is " + str(v))
     return v

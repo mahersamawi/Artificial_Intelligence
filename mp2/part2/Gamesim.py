@@ -14,31 +14,43 @@ white_pieces = game_board.get_white_pawns()
 
 def check_win_conditions():
     if (len(black_pieces) == 0 or len(black_pieces) == 0):
+        print("somebody fucked up")
         return False
     for black_pawn in black_pieces:
         pos_x, pos_y = black_pawn.get_position()
         if pos_x == 0:
+            print("black wins")
             return False
     for white_pawn in white_pieces:
         pos_x, pos_y = white_pawn.get_position()
         if pos_x == 7:
+            print("white wins")
             return False
     return True
+
+def move_black(heuristic):
+    current_pawn, dest, val = minimax_black(game_board, 2, heuristic)
+    game_board.move_pawn(current_pawn, dest)
+
+def move_white(heuristic):
+    current_pawn, dest, val = minimax_white(game_board, 2, heuristic)
+    game_board.move_pawn(current_pawn, dest)
+
 game_running = True
-i = 0
+
 # black_pieces = game_board.get_black_pawns()
 # for piece in black_pieces:
 #     pawn_x, pawn_y = piece.get_position()
 #     print("pawn position: (" + str(pawn_x) + ", " + str(pawn_y) + ")")
 while(game_running):
-    current_pawn, dest, val = minimax_black(game_board, 2, "offensive")
-    game_board.move_pawn(current_pawn, dest)
+    print("WHITE TURN")
+    move_white("offensive")
     game_board.print_board()
-    game_running = check_win_conditions()
-    game_board.scan_board()
     print("\n")
-    i += 1
+    print("BLACK TURN")
+    move_black("defensive")
+    game_board.print_board()
 
-
-print("\n")
-game_board.print_board()
+    game_board.scan_board()
+    game_running = check_win_conditions()
+    print("\n")

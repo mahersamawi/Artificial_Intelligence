@@ -67,10 +67,23 @@ class Board(object):
                     else:
                         self.black_pawns.append(pawn)
     def get_number_of_pawns(self, color):
+        num_black_pawns = 0
+        num_white_pawns = 0
+        for i in range(8):
+            for j in range(8):
+                pawn = self.board_array[i][j]
+                if pawn != None:
+                    # print("pawn position: " + pawn.get_position_str() )
+                    if pawn.get_color() == "w":
+                        num_white_pawns += 1    
+                    else:
+                        num_black_pawns += 1    
         if color == "w":
-            return len(self.white_pawns)
+            # return len(self.white_pawns)
+            return num_white_pawns
         else:
-            return len(self.black_pawns)
+            # return len(self.black_pawns)
+            return num_black_pawns
 
     def move_pawn(self, pawn, dest_tuple):
         pawn_pos = pawn.get_position()
