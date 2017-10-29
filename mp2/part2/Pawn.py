@@ -1,7 +1,7 @@
 class Pawn(object):
     pos_x = None
     pos_y = None
-    color = None # white or black (min or max)
+    color = None
 
     def __init__(self, x, y, color):
         self.pos_x = x
@@ -20,3 +20,6 @@ class Pawn(object):
 
     def print_pawn(self):
         print(self.color, end="")
+
+    def get_position_str(self):
+        return "(" + str(self.pos_x) + ", " + str(self.pos_y) + ")"

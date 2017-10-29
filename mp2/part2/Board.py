@@ -38,7 +38,34 @@ class Board(object):
                 else:
                     print("-", end="|")
             print("")
+    def scan_board(self):
+        num_black_pawns = 0
+        num_white_pawns = 0
+        for i in range(8):
+            for j in range(8):
+                pawn = self.board_array[i][j]
+                if pawn != None:
+                    # print("pawn position: " + pawn.get_position_str() )
+                    if pawn.get_color() == "w":
+                        num_white_pawns += 1    
+                    else:
+                        num_black_pawns += 1    
+        print("Num black pawns: " + str(num_black_pawns))
+        print("Num white pawns: " + str(num_white_pawns))
 
+
+    def update_arrays(self):
+        self.white_pawns = []
+        self.black_pawns = []
+        for i in range(8):
+            for j in range(8):
+                pawn = self.board_array[i][j]
+                if pawn != None:
+                    # print("pawn position: " + pawn.get_position_str() )
+                    if pawn.get_color() == "w":
+                        self.white_pawns.append(pawn)
+                    else:
+                        self.black_pawns.append(pawn)
     def get_number_of_pawns(self, color):
         if color == "w":
             return len(self.white_pawns)
@@ -51,6 +78,11 @@ class Board(object):
         self.board_array[dest_tuple[0]][dest_tuple[1]] = pawn
         pawn.set_position(dest_tuple[0], dest_tuple[1])
 
+    def set_pawn(self, pawn, dest_tuple):
+        self.board_array[dest_tuple[0]][dest_tuple[1]] = pawn
+        if (pawn != None):
+            pawn.set_position(dest_tuple[0], dest_tuple[1])
+    
     def get_white_pawns(self):
         return self.white_pawns
 
