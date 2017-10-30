@@ -8,7 +8,8 @@ class Board(object):
 
     def __init__(self):
         self.board_array = [[None for x in range(8)] for y in range(8)]
-
+        self.white_pawns = []
+        self.black_pawns = []
         for i in range(2):
             for j in range(8):
                 white_pawn = Pawn(i, j, "w")
