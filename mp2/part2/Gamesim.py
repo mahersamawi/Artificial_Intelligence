@@ -38,14 +38,16 @@ def check_win_conditions():
             return False
     return True
 
+
 def move_black(heuristic, depth):
     global game_board
-    current_pawn, dest, val = minimax_black(game_board, 3, heuristic)
+    current_pawn, dest, val = minimax(game_board, 4, heuristic, 'b', True)
     game_board.move_pawn(current_pawn, dest)
+
 
 def move_white(heuristic, depth):
     global game_board
-    current_pawn, dest, val = minimax_white(game_board, 3, heuristic)
+    current_pawn, dest, val = minimax(game_board, 3, heuristic, 'w', False)
     game_board.move_pawn(current_pawn, dest)
 
 
@@ -55,7 +57,7 @@ def move_white(heuristic, depth):
 #     print("pawn position: (" + str(pawn_x) + ", " + str(pawn_y) + ")")
 scenario = 0
 init_board()
-while (scenario < 10):
+while (scenario < 1):
     while(game_running):
         if (scenario % 2 == 0):
             move_black("offensive", 3)
@@ -68,11 +70,11 @@ while (scenario < 10):
         # print("\n")
         # print("BLACK TURN")
         
-        # game_board.print_board()
+        game_board.print_board()
         # game_board.scan_board()
         game_running = check_win_conditions()
         # print("\n")
-    # game_board.print_board()
+    #game_board.print_board()
     init_board()
     scenario += 1
     game_running = True
