@@ -25,7 +25,6 @@ def check_win_conditions():
     for black_pawn in black_pieces:
         pos_x, pos_y = black_pawn.get_position()
         if pos_x == 0:
-            print("winning pawn location: " + black_pawn.get_position_str())
             global num_black_wins 
             num_black_wins += 1
             print("black wins")
@@ -33,7 +32,6 @@ def check_win_conditions():
     for white_pawn in white_pieces:
         pos_x, pos_y = white_pawn.get_position()
         if pos_x == 7:
-            print("winning pawn location: " + white_pawn.get_position_str())
             global num_white_wins
             num_white_wins += 1
             print("white wins")
@@ -59,20 +57,23 @@ scenario = 0
 init_board()
 while (scenario < 10):
     while(game_running):
+        if (scenario % 2 == 0):
+            move_black("offensive", 3)
+            move_white("offensive", 3)
+        else:
+            move_white("offensive", 3)
+            move_black("offensive", 3)
         # print("WHITE TURN")
-        move_white("offensive", 3)
         # game_board.print_board()
         # print("\n")
         # print("BLACK TURN")
-        move_black("offensive", 3)
+        
         # game_board.print_board()
         # game_board.scan_board()
         game_running = check_win_conditions()
         # print("\n")
-    game_board.print_board()
+    # game_board.print_board()
     init_board()
-    print("\n")
-
     scenario += 1
     game_running = True
 print("Black winrate: " + str((100 * num_black_wins)/scenario))

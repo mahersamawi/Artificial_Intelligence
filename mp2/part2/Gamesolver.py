@@ -60,7 +60,7 @@ def minimax_white(game_board, max_depth, heuristic):
         pawn_x, pawn_y = pawn.get_position()
         for dest_loc in game_board.get_valid_moves(pawn):
             if (pawn_x == 6):
-                return (pawn, dest_loc, -1 * float('inf'))
+                return (pawn, dest_loc, float('inf'))
             dest_loc_pawn = game_board.get_board()[dest_loc[0]][dest_loc[1]]
             prev_pawn = None
             if dest_loc_pawn is not None:
@@ -68,7 +68,7 @@ def minimax_white(game_board, max_depth, heuristic):
                 prev_pawn_position = prev_pawn.get_position()
             # move pawn there
             game_board.move_pawn(pawn, dest_loc)
-            v = max_value(game_board, 1, max_depth, "w", heuristic)
+            v = min_value(game_board, 1, max_depth, "w", heuristic)
             # print("v in minimax is " + str(v))
             v_list.append((pawn, dest_loc, v))
             game_board.move_pawn(pawn, (pawn_x, pawn_y))
