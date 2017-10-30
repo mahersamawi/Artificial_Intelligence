@@ -39,15 +39,15 @@ def check_win_conditions():
     return True
 
 
-def move_black(heuristic, depth):
+def move_black(heuristic, depth, is_prune):
     global game_board
-    current_pawn, dest, val = minimax(game_board, 4, heuristic, 'b', True)
+    current_pawn, dest, val = minimax(game_board, depth, heuristic, 'b', is_prune)
     game_board.move_pawn(current_pawn, dest)
 
 
-def move_white(heuristic, depth):
+def move_white(heuristic, depth, is_prune):
     global game_board
-    current_pawn, dest, val = minimax(game_board, 3, heuristic, 'w', False)
+    current_pawn, dest, val = minimax(game_board, depth, heuristic, 'w', is_prune)
     game_board.move_pawn(current_pawn, dest)
 
 
@@ -56,22 +56,28 @@ def move_white(heuristic, depth):
 #     pawn_x, pawn_y = piece.get_position()
 #     print("pawn position: (" + str(pawn_x) + ", " + str(pawn_y) + ")")
 scenario = 0
+black_depth = 4
+white_depth = 3
+black_prune = True
+white_prune = False
 init_board()
 while (scenario < 1):
     while(game_running):
         if (scenario % 2 == 0):
-            move_black("offensive", 3)
-            move_white("offensive", 3)
+            move_white("offensive", white_depth, white_prune)
+            move_black("offensive", black_depth, black_prune)
         else:
-            move_white("offensive", 3)
-            move_black("offensive", 3)
+            move_white("offensive", white_depth, white_prune)
+            move_black("offensive", black_depth, black_prune)
         # print("WHITE TURN")
         # game_board.print_board()
         # print("\n")
         # print("BLACK TURN")
         
         game_board.print_board()
-        # game_board.scan_board()
+        game_board.scan_board()
+
+        print("\n")
         game_running = check_win_conditions()
         # print("\n")
     #game_board.print_board()
