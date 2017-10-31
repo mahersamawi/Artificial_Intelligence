@@ -38,14 +38,14 @@ def defensive_heuristic_2(game_board, color):
         for pawn in black_pawns:
             dist = pawn.get_position()[0]
             pawn_distance.append(dist)
-        return (1/max(pawn_distance))* 10 + random()
+        return (max(pawn_distance) + random())
     else:
         white_pawns = game_board.get_white_pawns()
         pawn_distance = []
         for pawn in white_pawns:
             dist = pawn.get_position()[0]
             pawn_distance.append(dist)
-        return (max(pawn_distance) * 10) + random()
+        return 1/(max(pawn_distance) + random())
 
 
 def print_potential_moves(v_list):

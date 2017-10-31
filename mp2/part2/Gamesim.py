@@ -133,19 +133,19 @@ def move_white(heuristic, depth, is_prune):
 
 scenario = 0
 
-white_depth = 3
-white_prune = False
+white_depth = 4
+white_prune = True
 
 black_depth = 4
 black_prune = True
 init_board()
 while (scenario < 1):
     while(game_running):
-        move_white("offensive1", white_depth, white_prune)
-        move_black("offensive1", black_depth, black_prune)
+        move_white("offensive2", white_depth, white_prune)
+        move_black("defensive2", black_depth, black_prune)
         game_running = check_win_conditions()
     init_board()
     scenario += 1
     game_running = True
-print("Black winrate: " + str((100 * num_black_wins)/scenario))
-print("White winrate: " + str((100 * num_white_wins)/scenario))
+# print("Black winrate: " + str((100 * num_black_wins)/scenario))
+# print("White winrate: " + str((100 * num_white_wins)/scenario))
