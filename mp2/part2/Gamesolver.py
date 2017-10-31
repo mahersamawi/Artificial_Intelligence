@@ -60,10 +60,9 @@ def minimax(game_board, max_depth, heuristic, color, is_prune):
     infinity = float('inf')
     alpha = -infinity
     beta = infinity
-    nodes_visited = 0
     v_list = []
     game_board.update_arrays()
-    total_nodes_visited = 0
+    total_nodes_visited = 1
     if color == "b":
         current_pawns_for_player = game_board.get_black_pawns()
     else:
@@ -87,7 +86,7 @@ def minimax(game_board, max_depth, heuristic, color, is_prune):
             # move pawn there
             game_board.move_pawn(pawn, dest_loc)
 
-            nodes_visited += 1
+            total_nodes_visited += 1
             v, nodes_visited = min_value(game_board, 1, max_depth, color, heuristic, is_prune, alpha, beta)
             total_nodes_visited += nodes_visited
             v_list.append((pawn, dest_loc, v))
@@ -125,6 +124,7 @@ def max_value(game_board, curr_depth, max_depth, parent_color, parent_heuristic,
             # move pawn there
             game_board.move_pawn(pawn, dest_loc)
             # recurse
+            total_nodes_visited += 1
             min_rt_val, nodes_visited = min_value(game_board, curr_depth + 1, max_depth, parent_color, parent_heuristic, is_prune, alpha, beta)
             total_nodes_visited += nodes_visited
             v = max(v, min_rt_val, key=float)
@@ -168,7 +168,10 @@ def min_value(game_board, curr_depth, max_depth, parent_color, parent_heuristic,
             # move pawn there
             game_board.move_pawn(pawn, dest_loc)
             # recurse
+
+            total_nodes_visited += 1
             max_rt_val, nodes_visited = max_value(game_board, curr_depth + 1, max_depth, parent_color, parent_heuristic, is_prune, alpha, beta)
+            total_nodes_visited += nodes_visited
             v = min(v, max_rt_val, key=float)
             game_board.move_pawn(pawn, (pawn_x, pawn_y))
             if prev_pawn is not None:

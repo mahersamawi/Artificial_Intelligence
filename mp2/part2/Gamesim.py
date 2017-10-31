@@ -1,4 +1,5 @@
 from Gamesolver import *
+import time
 
 game_board = None
 black_pieces = None
@@ -8,6 +9,10 @@ num_white_wins = 0
 game_running = True
 white_nodes_visited = 0
 black_nodes_visited = 0
+total_moves = 0
+black_moves = 0
+white_moves = 0
+total_time_for_moves = 0
 
 def init_board():
     global game_board
@@ -25,71 +30,120 @@ def init_board():
     global black_nodes_visited
     black_nodes_visited = 0
 
+    global total_moves
+    total_moves = 0
+
 def check_win_conditions():
-    if (len(black_pieces) == 0 or len(white_pieces) == 0):
-        print("somebody fucked up")
+    avg_black_nodes_expanded = (black_nodes_visited)/black_moves
+    avg_white_nodes_expanded = (white_nodes_visited)/white_moves
+    avg_num_nodes_expanded = (white_nodes_visited + black_nodes_visited)/total_moves
+    avg_time_per_move = total_time_for_moves/total_moves
+    if (len(black_pieces) == 0):
+        print("WHITE WINS!!! \nBlack lost all their pieces somehow!!")
+        return False
+    if (len(white_pieces) == 0):
+        print("BLACK WINS!!! \nBlack lost all their pieces somehow!!")
         return False
     for black_pawn in black_pieces:
         pos_x, pos_y = black_pawn.get_position()
         if pos_x == 0:
             global num_black_wins 
             num_black_wins += 1
-            print("black wins, visited " + str(black_nodes_visited) + " nodes")
-            print("white visited " + str(white_nodes_visited) + " nodes ")
+            game_board.print_board()
+            game_board.scan_board()
+            print("BLACK WINS!!!")
+            print("black visited " + str(black_nodes_visited) + " nodes")
+            print("white visited " + str(white_nodes_visited) + " nodes")
+            print("White moves: " + str(white_moves))
+            print("Black moves: " + str(black_moves))
+            print("Total moves: " + str(total_moves))
+            print("Average white nodes expanded per move: " + str(avg_white_nodes_expanded))
+            print("Average black nodes expanded per move: " + str(avg_black_nodes_expanded))
+            print("Average nodes expanded of both types per move: " + str(avg_num_nodes_expanded))
+            print("Average time per move: " + str(avg_time_per_move))
+            print("Total time elapsed: " + str(total_time_for_moves))
             return False
     for white_pawn in white_pieces:
         pos_x, pos_y = white_pawn.get_position()
         if pos_x == 7:
             global num_white_wins
             num_white_wins += 1
-            print("white wins with " + str(white_nodes_visited) + " nodes visited")
-            print("black visited " + str(black_nodes_visited) + " nodes ")
+            game_board.print_board()
+            game_board.scan_board()
+            print("WHITE WINS!!!")
+            print("white visited " + str(white_nodes_visited) + " nodes")
+            print("black visited " + str(black_nodes_visited) + " nodes")
+            print("Total moves: " + str(total_moves))
+            print("White moves: " + str(white_moves))
+            print("Black moves: " + str(black_moves))
+            print("Average white nodes expanded per move: " + str(avg_white_nodes_expanded))
+            print("Average black nodes expanded per move: " + str(avg_black_nodes_expanded))
+            print("Average nodes expanded of both types per move: " + str(avg_num_nodes_expanded))
+            print("Average time per move: " + str(avg_time_per_move))
+            print("Total time elapsed: " + str(total_time_for_moves))
             return False
     return True
 
 
 def move_black(heuristic, depth, is_prune):
+    start_time = time.time()
+    
     global game_board
     current_pawn, dest, val, nodes_visited = minimax(game_board, depth, heuristic, 'b', is_prune)
     game_board.move_pawn(current_pawn, dest)
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+
+    global total_time_for_moves
+    total_time_for_moves += elapsed_time
+
+    global total_moves
+    total_moves += 1
+
+    global black_moves
+    black_moves += 1
 
     global black_nodes_visited
     black_nodes_visited += nodes_visited
 
 
 def move_white(heuristic, depth, is_prune):
+    start_time = time.time()
     global game_board
     current_pawn, dest, val, nodes_visited = minimax(game_board, depth, heuristic, 'w', is_prune)
     game_board.move_pawn(current_pawn, dest)
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+
+    global total_time_for_moves
+    total_time_for_moves += elapsed_time
+
+    global total_moves
+    total_moves += 1
+
+    global white_moves
+    white_moves += 1
 
     global white_nodes_visited
     white_nodes_visited += nodes_visited
 
 
-# black_pieces = game_board.get_black_pawns()
-# for piece in black_pieces:
-#     pawn_x, pawn_y = piece.get_position()
-#     print("pawn position: (" + str(pawn_x) + ", " + str(pawn_y) + ")")
-scenario = 0
-black_depth = 4
-white_depth = 4
 
+scenario = 0
+
+white_depth = 3
+white_prune = False
+
+black_depth = 4
 black_prune = True
-white_prune = True
 init_board()
-while (scenario < 10):
+while (scenario < 1):
     while(game_running):
-        # if (scenario % 2 == 0):
-        # print("WHITE TURN")
-        move_white("defensive2", white_depth, white_prune)
-        # game_board.print_board()
-        # print("BLACK TURN")
+        move_white("offensive1", white_depth, white_prune)
         move_black("offensive1", black_depth, black_prune)
-        # game_board.print_board()
-        # game_board.scan_board()
-        # print("")        
         game_running = check_win_conditions()
-    game_board.print_board()
     init_board()
     scenario += 1
     game_running = True
