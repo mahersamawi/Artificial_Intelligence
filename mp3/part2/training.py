@@ -6,6 +6,7 @@ label_counts = [0 for i in range(2)]
 priors = [0 for i in range(2)]
 num_images = 0
 laplace_constant = 5
+confusion_matrix = [[0 for i in range(2)] for j in range(2)]
 
 
 def get_file(file_name):
@@ -128,10 +129,11 @@ while image_index < num_test_images_yes:
         num_correct += 1
         test_label_output[expected_label] += 1
     else:
-        # confusion_matrix[output][expected_label] += 1
+        confusion_matrix[output][expected_label] += 1
         print("Misidentified: |" + str(output) + "|" + str(expected_label) + "|")
 
 print("No testing")
+image_index = 0
 #  No testing
 while image_index < num_test_images_no:
     class_prob = [0 for i in range(2)]
@@ -159,7 +161,7 @@ while image_index < num_test_images_no:
         num_correct += 1
         test_label_output[expected_label] += 1
     else:
-        #confusion_matrix[output][expected_label] += 1
+        confusion_matrix[output][expected_label] += 1
         print("Misidentified: |" + str(output) + "|" + str(expected_label) + "|")
 for i in range(len(test_label_output)):
     test_label_output[i] /= total_test_labels[i]
@@ -167,3 +169,6 @@ for i in range(len(test_label_output)):
 
 print("Number correct: " + str(num_correct))
 print("Percentage correct: " + str(num_correct/num_test_images))
+
+for i in confusion_matrix:
+    print(i)
