@@ -1,4 +1,5 @@
 import math
+from matplotlib import pyplot as plt
 
 training_labels_array = []
 training_images_array = []
@@ -112,7 +113,6 @@ for i in confusion_matrix:
     # print(max(i))
     # print(i.index((max(i))))
 
-print("Odds Ratios for 9 and 4")
 c1 = 9
 c2 = 4
 c1_arr = [[0 for i in range(28)] for j in range(28)]
@@ -121,18 +121,11 @@ c2_arr = [[0 for i in range(28)] for j in range(28)]
 for row in range(len(totals[c1])):
     for col in range(len(totals[c1][row])):
         val = math.log(totals[c1][row][col])
-        if val > 0:
-            c1_arr[row][col] = "+"
-        elif val < 0 and val > -1:
-            c1_arr[row][col] = "-"
-        elif val < -1 and val > -2 :
-            c1_arr[row][col] = "#"
-        elif val < -2 and val > -3:
-            c1_arr[row][col] = "*"
-with open('log_likelihood.txt', 'w') as f:
-    for i in c1_arr:
-        for j in i:
-            f.write(str(j))
+        c1_arr[row][col] = val
+        
+plt.imshow(c1_arr, cmap='hot', interpolation='nearest')
+plt.colorbar()
+plt.savefig('first_pair.png', dpi=100)
 
 
 
