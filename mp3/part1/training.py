@@ -119,7 +119,7 @@ def plot_likelihood(c_val, c_arr):
         for col in range(len(totals[c_val][row])):
             val = math.log(totals[c_val][row][col])
             c_arr[row][col] = val
-
+    plt.figure()
     plt.imshow(c_arr, cmap='rainbow', interpolation='nearest')
     plt.colorbar()
     plt.savefig('./output_figures/likelihood_for_' + str(c_val) + '.png', dpi=100)
@@ -131,7 +131,7 @@ def plot_odds_ratio(c_val1, c_val2, c_arr):
             val1 = totals[c_val1][row][col]
             val2 = totals[c_val2][row][col]
             c_arr[row][col] = math.log(val1 / val2)
-
+    plt.figure()        
     plt.imshow(c_arr, cmap='rainbow', interpolation='nearest', vmin=-3, vmax=1.5)
     plt.colorbar()
     plt.savefig('./output_figures/odds_ratio_for_' + str(c_val1) + "_over_" + str(c_val2) + '.png', dpi=100)
