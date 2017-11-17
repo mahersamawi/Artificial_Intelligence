@@ -98,16 +98,16 @@ total_test_labels = [0 for i in range(2)]
 test_label_output = [0 for i in range(2)]
 image_index = 0
 num_correct = 0
-num_test_images_yes = 1401 - 1 / 28
-num_test_images_no = 1401 - 1 / 28
-
+num_test_images_yes = 1400 / 28
+num_test_images_no = 1400 / 28
+num_test_images = num_test_images_yes + num_test_images_no
 # yes testing
+print("Yes testing")
 while image_index < num_test_images_yes:
     class_prob = [0 for i in range(2)]
     expected_label = 1
     test_image = []
     for i in range(25):
-        print(image_index)
         image_line = test_images_array_yes[image_index * 28 + i]
         test_image.append(image_line)
     for class_index in range(2):
@@ -130,7 +130,8 @@ while image_index < num_test_images_yes:
     else:
         # confusion_matrix[output][expected_label] += 1
         print("Misidentified: |" + str(output) + "|" + str(expected_label) + "|")
-#
+
+print("No testing")
 #  No testing
 while image_index < num_test_images_no:
     class_prob = [0 for i in range(2)]
@@ -160,3 +161,9 @@ while image_index < num_test_images_no:
     else:
         #confusion_matrix[output][expected_label] += 1
         print("Misidentified: |" + str(output) + "|" + str(expected_label) + "|")
+for i in range(len(test_label_output)):
+    test_label_output[i] /= total_test_labels[i]
+    print("Label " + str(i) + " Accuracy: " + str(test_label_output[i]))
+
+print("Number correct: " + str(num_correct))
+print("Percentage correct: " + str(num_correct/num_test_images))
