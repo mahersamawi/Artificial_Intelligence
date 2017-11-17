@@ -5,7 +5,7 @@ training_images_array_yes = []
 label_counts = [0 for i in range(2)]
 priors = [0 for i in range(2)]
 num_images = 0
-laplace_constant = 0.1
+laplace_constant = 5
 
 
 def get_file(file_name):
@@ -89,3 +89,74 @@ print(label_counts)
 get_averages()
 print(priors)
 # Testing part
+
+test_images_array_yes = get_file("yes_test.txt")
+test_images_array_no = get_file("no_test.txt")
+
+test_output = []
+total_test_labels = [0 for i in range(2)]
+test_label_output = [0 for i in range(2)]
+image_index = 0
+num_correct = 0
+num_test_images_yes = 1401 - 1 / 28
+num_test_images_no = 1401 - 1 / 28
+
+# yes testing
+while image_index < num_test_images_yes:
+    class_prob = [0 for i in range(2)]
+    expected_label = 1
+    test_image = []
+    for i in range(25):
+        print(image_index)
+        image_line = test_images_array_yes[image_index * 28 + i]
+        test_image.append(image_line)
+    for class_index in range(2):
+        class_prob[class_index] = math.log(priors[class_index])
+        for row in range(25):
+            line = test_image[row]
+            for col in range(10):
+                pixel = line[col]
+                if pixel != ' ':
+                    class_prob[class_index] += math.log(totals[class_index][row][col])
+                else:
+                    class_prob[class_index] += math.log(1 - totals[class_index][row][col])
+    image_index += 1
+    output = class_prob.index(max(class_prob))
+    test_output.append(output)
+    total_test_labels[expected_label] += 1
+    if output == expected_label:
+        num_correct += 1
+        test_label_output[expected_label] += 1
+    else:
+        # confusion_matrix[output][expected_label] += 1
+        print("Misidentified: |" + str(output) + "|" + str(expected_label) + "|")
+#
+#  No testing
+while image_index < num_test_images_no:
+    class_prob = [0 for i in range(2)]
+    expected_label = 0
+    test_image = []
+    for i in range(25):
+        image_line = test_images_array_no[image_index * 28 + i]
+        test_image.append(image_line)
+    for class_index in range(2):
+        class_prob[class_index] = math.log(priors[class_index])
+        for row in range(25):
+            line = test_image[row]
+            for col in range(10):
+                pixel = line[col]
+                if pixel != ' ':
+                    class_prob[class_index] += math.log(totals[class_index][row][col])
+                else:
+                    class_prob[class_index] += math.log(1 - totals[class_index][row][col])
+    image_index += 1
+
+    output = class_prob.index(max(class_prob))
+    test_output.append(output)
+    total_test_labels[expected_label] += 1
+    if output == expected_label:
+        num_correct += 1
+        test_label_output[expected_label] += 1
+    else:
+        #confusion_matrix[output][expected_label] += 1
+        print("Misidentified: |" + str(output) + "|" + str(expected_label) + "|")
