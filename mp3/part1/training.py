@@ -18,7 +18,7 @@ num_images = 0
 # 0.5 | 75
 # 1 | 74.7
 # 5 | 74.8
-laplace_constant = 0.1
+laplace_constant = 1
 
 def get_image(current_index):
     current_image = []
@@ -33,7 +33,7 @@ def get_averages():
         for row in range(28):
             for col in range(28):
                 totals[label][row][col] += laplace_constant
-                totals[label][row][col] /= (num_labels * 2)
+                totals[label][row][col] /= (num_labels * laplace_constant)
 
     for i in range(10):
         priors[i] = label_counts[i]/num_images
