@@ -113,19 +113,45 @@ for i in confusion_matrix:
     # print(max(i))
     # print(i.index((max(i))))
 
-c1 = 9
-c2 = 4
+
+def plot_likelihood(c_val, c_arr):
+    for row in range(len(totals[c_val])):
+        for col in range(len(totals[c_val][row])):
+            val = math.log(totals[c_val][row][col])
+            c_arr[row][col] = val
+
+    plt.imshow(c_arr, cmap='rainbow', interpolation='nearest')
+    plt.colorbar()
+    plt.savefig('./output_figures/likelihood_for_' + str(c_val) + '.png', dpi=100)
+
+
+def plot_odds_ratio(c_val1, c_val2, c_arr):
+    for row in range(len(totals[c_val1])):
+        for col in range(len(totals[c_val1][row])):
+            val1 = totals[c_val1][row][col]
+            val2 = totals[c_val2][row][col]
+            c_arr[row][col] = math.log(val1 / val2)
+
+    plt.imshow(c_arr, cmap='rainbow', interpolation='nearest', vmin=-3, vmax=1.5)
+    plt.colorbar()
+    plt.savefig('./output_figures/odds_ratio_for_' + str(c_val1) + "_over_" + str(c_val2) + '.png', dpi=100)
+
+
+c1 = [9, 3, 9, 8]
+c2 = [4, 5, 7, 5]
 c1_arr = [[0 for i in range(28)] for j in range(28)]
 c2_arr = [[0 for i in range(28)] for j in range(28)]
+odds_arr = [[0 for i in range(28)] for j in range(28)]
+for i in range(4):
+    plot_likelihood(c1[i], c1_arr)
+    plot_likelihood(c2[i], c2_arr)
+    plot_odds_ratio(c1[i], c2[i], odds_arr)
 
-for row in range(len(totals[c1])):
-    for col in range(len(totals[c1][row])):
-        val = math.log(totals[c1][row][col])
-        c1_arr[row][col] = val
-        
-plt.imshow(c1_arr, cmap='hot', interpolation='nearest')
-plt.colorbar()
-plt.savefig('first_pair.png', dpi=100)
+
+
+
+
+
 
 
 
