@@ -139,6 +139,7 @@ def plot_odds_ratio(c_val1, c_val2, c_arr):
 
 c1 = [9, 3, 9, 8]
 c2 = [4, 5, 7, 5]
+# highest_confusion_values for the pairs = [23, 22, 21, 19.4]
 c1_arr = [[0 for i in range(28)] for j in range(28)]
 c2_arr = [[0 for i in range(28)] for j in range(28)]
 odds_arr = [[0 for i in range(28)] for j in range(28)]
@@ -146,12 +147,5 @@ for i in range(4):
     plot_likelihood(c1[i], c1_arr)
     plot_likelihood(c2[i], c2_arr)
     plot_odds_ratio(c1[i], c2[i], odds_arr)
-
-
-
-
-
-
-
 
 
