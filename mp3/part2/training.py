@@ -40,9 +40,9 @@ def get_averages():
 
     for i in range(2):
         if i == 0:
-            priors[i] = label_counts[i]/num_images_no
+            priors[i] = label_counts[i] / (num_images_no + num_images_yes)
         else:
-            priors[i] = label_counts[i] / num_images_yes
+            priors[i] = label_counts[i] / (num_images_no + num_images_yes)
 
 
 training_labels_images_no = get_file("no_train.txt")
@@ -61,10 +61,8 @@ image_index = 0
 while image_index < num_images_yes:
     current_label = 1
     current_image = get_sound(image_index, "yes")
-    print(current_image)
     label_counts[current_label] += 1
     for i in range(25):
-        print(len(current_image[i]))
         line = current_image[i]
         for j in range(10):
             pixel = line[j]
@@ -86,8 +84,8 @@ while image_index < num_images_no:
                 totals[current_label][i][j] += 1
     image_index += 1
 
-get_averages()
-print(label_counts)
-print(priors)
 
+print(label_counts)
+get_averages()
+print(priors)
 # Testing part
