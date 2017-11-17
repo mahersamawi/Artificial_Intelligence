@@ -6,6 +6,18 @@ training_images_array = []
 label_counts = [0 for i in range(10)]
 priors = [0 for i in range(10)]
 num_images = 0
+
+# below are the laplace constants we tried; seems like 0.01 is best one as the bigger it gets the worse
+# the accuracy gets
+
+# constants | accuracy 
+# 0.1 | 75.2
+# 0.01 | 75.4
+# 0.2 | 75.1
+# 0.001 | 75.4
+# 0.5 | 75
+# 1 | 74.7
+# 5 | 74.8
 laplace_constant = 0.1
 
 def get_image(current_index):
