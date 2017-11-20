@@ -11,14 +11,14 @@ num_images = 0
 # the accuracy gets
 
 # constants | accuracy 
-# 0.1 | 75.2
-# 0.01 | 75.4
-# 0.2 | 75.1
-# 0.001 | 75.4
-# 0.5 | 75
+# 0.001 | 77.4
+# 0.01 | 77.2
+# 0.1 | 77.1
+# 0.2 | 76.6
+# 0.5 | 75.5
 # 1 | 74.7
-# 5 | 74.8
-laplace_constant = 1
+# 5 | 67.5
+laplace_constant = 5
 
 def get_image(current_index):
     current_image = []
@@ -33,7 +33,7 @@ def get_averages():
         for row in range(28):
             for col in range(28):
                 totals[label][row][col] += laplace_constant
-                totals[label][row][col] /= (num_labels * laplace_constant)
+                totals[label][row][col] /= (num_labels + (laplace_constant * num_labels))
 
     for i in range(10):
         priors[i] = label_counts[i]/num_images
@@ -105,12 +105,12 @@ while image_index < num_test_images:
         test_label_output[expected_label] += 1
     else:
         confusion_matrix[output][expected_label] += 1
-        #print("Misidentified: |" + str(output) + "|" + str(expected_label) + "|")
 
 for i in range(len(test_label_output)):
     test_label_output[i] /= total_test_labels[i]
     print("Label " + str(i) + " Accuracy: " + str(test_label_output[i]))
 
+print("Laplace constant: " + str(laplace_constant))
 print("Number correct: " + str(num_correct))
 print("Percentage correct: " + str(num_correct/num_test_images))
 
