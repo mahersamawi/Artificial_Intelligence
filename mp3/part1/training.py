@@ -133,14 +133,26 @@ while image_index < num_test_images:
                 else:
                     class_prob[class_index] += math.log(1 - totals[class_index][row][col])
 
-    for i in range(10):
-        prob = class_prob[i]
-        if prob < low_post_prob[i]:
-            low_post_prob[i] = prob
-            low_post_prob_ind[i] = image_index
-        if prob > high_post_prob[i]:
-            high_post_prob[i] = prob
-            high_post_prob_ind[i] = class_index
+    # old logic
+    # for i in range(10):
+    #     prob = class_prob[i]
+    #     if prob < low_post_prob[i]:
+    #         low_post_prob[i] = prob
+    #         low_post_prob_ind[i] = image_index
+    #     if prob > high_post_prob[i]:
+    #         high_post_prob[i] = prob
+    #         high_post_prob_ind[i] = class_index
+
+    # new logic - get highest and lowest posterior probability according to the class we are currently looking at
+    # e.g. if the current "test_image" is a 4, we will only update the lowest/highest probs for 4
+
+    prob = class_prob[expected_label]
+    if prob < low_post_prob[expected_label]:
+        low_post_prob[expected_label] = prob
+        low_post_prob_ind[expected_label] = image_index
+    if prob > high_post_prob[expected_label]:
+        high_post_prob[expected_label] = prob
+        high_post_prob_ind[expected_label] = image_index
 
     output = class_prob.index(max(class_prob))
     test_output.append(output)
