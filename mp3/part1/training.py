@@ -18,7 +18,7 @@ num_images = 0
 # 0.5 | 75.5
 # 1 | 74.7
 # 5 | 67.5
-laplace_constant = 5
+laplace_constant = 0.1
 
 def get_image(current_index):
     current_image = []
@@ -45,6 +45,34 @@ def get_file(file_name):
         for line in text_file:
             arr.append(line.rstrip('\n'))
     return arr
+
+def get_test_examples():
+    print("Getting test example outliers...")
+    for i in range(10):
+        low_index = low_post_prob_ind[i]
+        low_prob = low_post_prob[i]
+        high_index = high_post_prob_ind[i]
+        high_prob = high_post_prob[i]
+        print("*************************************************")
+        print("Class: " + str(i))
+        print("Lowest posterior probability example: ")
+        print("")
+        print("Index: " + str(low_index))
+        print("Probability: " + str(low_prob))
+        
+
+        for i in range(28):
+            image_line = test_images_array[low_index * 28 + i]
+            print(image_line)
+
+        print("Highest posterior probability example: ")
+        print("")
+        print("Index: " + str(high_index))
+        print("Probability: " + str(high_prob))
+        for i in range(28):
+            image_line = test_images_array[high_index * 28 + i]
+            print(image_line)
+        print("*************************************************")
 
 
 training_labels_array = get_file("traininglabels")
@@ -79,6 +107,14 @@ image_index = 0
 num_correct = 0
 num_test_images = len(test_labels_array)
 
+# arrays of highest and lowest posterior probabilities from each class
+high_post_prob = [-100000 for i in range(10)]
+low_post_prob = [100000 for i in range(10)]
+
+# indices of highest and lowest posterior probabilities from each class
+high_post_prob_ind = [0 for i in range(10)]
+low_post_prob_ind = [1000 for i in range(10)]
+
 while image_index < num_test_images:
     class_prob = [0 for i in range(10)]
     expected_label = int(test_labels_array[image_index])
@@ -96,7 +132,16 @@ while image_index < num_test_images:
                     class_prob[class_index] += math.log(totals[class_index][row][col])
                 else:
                     class_prob[class_index] += math.log(1 - totals[class_index][row][col])
-    image_index += 1
+
+    for i in range(10):
+        prob = class_prob[i]
+        if prob < low_post_prob[i]:
+            low_post_prob[i] = prob
+            low_post_prob_ind[i] = image_index
+        if prob > high_post_prob[i]:
+            high_post_prob[i] = prob
+            high_post_prob_ind[i] = class_index
+
     output = class_prob.index(max(class_prob))
     test_output.append(output)
     total_test_labels[expected_label] += 1
@@ -105,6 +150,9 @@ while image_index < num_test_images:
         test_label_output[expected_label] += 1
     else:
         confusion_matrix[output][expected_label] += 1
+
+    image_index += 1
+
 
 for i in range(len(test_label_output)):
     test_label_output[i] /= total_test_labels[i]
@@ -160,4 +208,4 @@ for i in range(4):
     plot_likelihood(c2[i], c2_arr)
     plot_odds_ratio(c1[i], c2[i], odds_arr)
 
-
+get_test_examples()
