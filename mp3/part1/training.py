@@ -161,7 +161,7 @@ while image_index < num_test_images:
         num_correct += 1
         test_label_output[expected_label] += 1
     else:
-        confusion_matrix[output][expected_label] += 1
+        confusion_matrix[expected_label][output] += 1
 
     image_index += 1
 
@@ -176,7 +176,7 @@ print("Percentage correct: " + str(num_correct/num_test_images))
 
 for i in range(len(confusion_matrix)):
     for j in range(len(confusion_matrix[i])):
-        confusion_matrix[i][j] = round(confusion_matrix[i][j] / total_test_labels[i], 3)
+        confusion_matrix[j][i] = format(round(confusion_matrix[j][i] / total_test_labels[i], 3), '.3f')
 
 print("Confusion Matrix")
 
@@ -209,8 +209,8 @@ def plot_odds_ratio(c_val1, c_val2, c_arr):
     plt.savefig('./output_figures/odds_ratio_for_' + str(c_val1) + "_over_" + str(c_val2) + '.png', dpi=100)
 
 
-c1 = [9, 3, 9, 8]
-c2 = [4, 5, 7, 5]
+c1 = [4, 5, 7, 8]
+c2 = [9, 3, 9, 3]
 # highest_confusion_values for the pairs = [23, 22, 21, 19.4]
 c1_arr = [[0 for i in range(28)] for j in range(28)]
 c2_arr = [[0 for i in range(28)] for j in range(28)]
