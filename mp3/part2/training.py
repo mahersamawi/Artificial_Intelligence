@@ -5,7 +5,7 @@ training_images_array_yes = []
 label_counts = [0 for i in range(2)]
 priors = [0 for i in range(2)]
 num_images = 0
-laplace_constant = 5
+laplace_constant = 2
 confusion_matrix = [[0 for i in range(2)] for j in range(2)]
 
 
@@ -169,6 +169,10 @@ for i in range(len(test_label_output)):
 
 print("Number correct: " + str(num_correct))
 print("Percentage correct: " + str(num_correct/num_test_images))
+
+for i in range(len(confusion_matrix)):
+    for j in range(len(confusion_matrix[i])):
+        confusion_matrix[i][j] = round(confusion_matrix[i][j] / total_test_labels[i], 3)
 
 for i in confusion_matrix:
     print(i)
