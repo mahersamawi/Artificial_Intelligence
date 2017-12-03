@@ -1,14 +1,4 @@
 import math
-from matplotlib import pyplot as plt
-
-def get_averages():
-    for label in range(10):
-        num_labels = label_counts[label]
-        for row in range(28):
-            for col in range(28):
-                weights[label][row][col] += laplace_constant
-                weights[label][row][col] /= (num_labels + (laplace_constant * num_labels))
-
 
 def get_image(current_index):
     current_image = []
@@ -59,7 +49,7 @@ print(num_images)
 image_index = 0
 weights = [[[0 for k in range(28)] for j in range(28)] for i in range(10)]
 confusion_matrix = [[0 for i in range(10)] for j in range(10)]
-epochs = 10
+epochs = 3
 current_epoch = 0
 alpha = 1
 decay_rate = 1000
@@ -75,12 +65,13 @@ while current_epoch < epochs:
         # Check if prediction was right
         check_prediction(classified_label, current_label, current_image)
         image_index += 1
+    print("Incrementing epoch")
     current_epoch += 1
     alpha = decay_rate / (decay_rate + current_epoch)
 
 total_correct_training = 0
 for i in range(len(final_results)):
-    if final_results[i] == training_labels_array[i]:
+    if int(final_results[i]) == int(training_labels_array[i]):
         total_correct_training += 1
 
 print("Overall correct: " + str(total_correct_training/num_images))
