@@ -30,7 +30,7 @@ def classify(current_image):
 
 
 def check_prediction(classified_label, correct_label, current_image):
-    if classified_label != correct_label:
+    if int(classified_label) != int(correct_label):
         # updated both weights
         for class_label in range(10):
             for row in range(28):
