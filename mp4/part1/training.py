@@ -40,6 +40,15 @@ def check_prediction(classified_label, correct_label, current_image):
                         weights[classified_label][row][col] -= alpha
 
 
+def get_training_accuracy(current_run):
+    total_correct_training = 0
+    for i in range(len(final_results)):
+        if int(final_results[i]) == int(training_labels_array[i]):
+            total_correct_training += 1
+
+    print("Overall correct on training data for epoch " + str(current_run) + ": " + str(total_correct_training / num_images))
+
+
 b = 1
 label_counts = [0 for i in range(10)]
 training_labels_array = get_file("traininglabels")
@@ -48,7 +57,7 @@ num_images = int(len(training_images_array)/28)
 image_index = 0
 weights = [[[0 for k in range(28)] for j in range(28)] for i in range(10)]
 confusion_matrix = [[0 for i in range(10)] for j in range(10)]
-epochs = 5
+epochs = 8
 current_epoch = 0
 alpha = 1
 decay_rate = 1000
@@ -65,16 +74,12 @@ while current_epoch < epochs:
         # Check if prediction was right
         check_prediction(classified_label, current_label, current_image)
         image_index += 1
-    print("Incrementing epoch")
+    get_training_accuracy(current_epoch)
+    #print("Incrementing epoch")
     current_epoch += 1
     alpha = decay_rate / (decay_rate + current_epoch)
 
-total_correct_training = 0
-for i in range(len(final_results)):
-    if int(final_results[i]) == int(training_labels_array[i]):
-        total_correct_training += 1
-
-print("Overall correct on training data: " + str(total_correct_training/num_images))
+get_training_accuracy(current_epoch)
 
 # Testing
 test_images_array = get_file("testimages")
@@ -97,7 +102,26 @@ while image_index < num_test_images:
 
 total_correct_test = 0
 for i in range(len(test_labels_array)):
-    if int(final_results_testing[i]) == int(test_labels_array[i]):
+    expected_label = int(test_labels_array[i])
+    output_label = int(final_results_testing[i])
+    total_test_labels[expected_label] += 1
+    if output_label == expected_label:
         total_correct_test += 1
+        test_label_output[expected_label] += 1
+    else:
+        # Classified incorrectly
+        confusion_matrix[expected_label][output_label] += 1
 
 print("Overall correct on test data: " + str(total_correct_test/num_test_images))
+
+for i in range(len(confusion_matrix)):
+    for j in range(len(confusion_matrix[i])):
+        confusion_matrix[j][i] = format(round(confusion_matrix[j][i] / total_test_labels[i], 3), '.3f')
+
+print("Confusion Matrix")
+for i in confusion_matrix:
+    print(i)
+
+for i in range(len(test_label_output)):
+    test_label_output[i] /= total_test_labels[i]
+    print("Label " + str(i) + " Accuracy: " + str(test_label_output[i]))
