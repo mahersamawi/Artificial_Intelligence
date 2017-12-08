@@ -1,4 +1,5 @@
 import math
+import random
 
 def get_image(current_index, list_with_image):
     current_image = []
@@ -24,8 +25,8 @@ def classify(current_image):
         for row in range(28):
             for col in range(28):
                 if current_image[row][col] != ' ':
-                    dot_product += weights[class_label][row][col] + b
-        dot_products_list.append(dot_product)
+                    dot_product += (weights[class_label][row][col])
+        dot_products_list.append(dot_product + bias)
     return dot_products_list.index((max(dot_products_list)))
 
 
@@ -49,23 +50,35 @@ def get_training_accuracy(current_run):
     print("Overall correct on training data for epoch " + str(current_run) + ": " + str(total_correct_training / num_images))
 
 
-b = 1
+# variables to mess around with (besides training image order)
+bias = 1 # is this bias?
+
+decay_rate = 0
+# decay_rate = 0 gives 78% for first training epoch, then 86% for every subsequent epoch, and for testing gives 79%
+# decay_rate = 1 gives 95%/83.4% for training/testing
+# decay_rate = 10 gives 93%/77.6% for training/testing
+# decay_rate = 100 gives 92%/81.6% for training/testing
+# decay_rate = 1000 gives 92%/81.7% for training/testing
+
+weights = [[[0 for k in range(28)] for j in range(28)] for i in range(10)]
+
+epochs = 6
+
 label_counts = [0 for i in range(10)]
 training_labels_array = get_file("traininglabels")
 training_images_array = get_file("trainingimages")
 num_images = int(len(training_images_array)/28)
 image_index = 0
-weights = [[[0 for k in range(28)] for j in range(28)] for i in range(10)]
 confusion_matrix = [[0 for i in range(10)] for j in range(10)]
-epochs = 8
-current_epoch = 0
+current_epoch = 1
 alpha = 1
-decay_rate = 1000
 final_results = [0 for i in range(num_images)]
 # Training
 while current_epoch < epochs:
-    image_index = 0
-    while image_index < num_images:
+    image_index_array = [i for i in range(num_images)]
+    image_index = random.choice(image_index_array)
+    image_index_array.remove(image_index)
+    while image_index < num_images-1:
         current_label = int(training_labels_array[image_index])
         current_image = get_image(image_index, training_images_array)
         label_counts[current_label] += 1
@@ -73,7 +86,8 @@ while current_epoch < epochs:
         final_results[image_index] = classified_label
         # Check if prediction was right
         check_prediction(classified_label, current_label, current_image)
-        image_index += 1
+        image_index = random.choice(image_index_array)
+        image_index_array.remove(image_index)
     get_training_accuracy(current_epoch)
     #print("Incrementing epoch")
     current_epoch += 1
