@@ -101,26 +101,27 @@ def update_game():
 def update_game_state():
     board_state[0] = int(ball_x * 12)
     board_state[1] = int(ball_y * 12)
+    board_x = board_state[0]
+    board_y = board_state[1]
+    
     if velocity_x < 0:
-        # From -1 to 0
+        # Either -1 or 1
         board_state[2] = 0
     else:
         board_state[2] = 1
     if math.fabs(velocity_y) < 0.015:
-        board_state[3] = 0
+        # velocity_y can be -1, 0, 1
+        board_state[3] = 1
     elif velocity_y < 0:
-        # From -1 to 0
         board_state[3] = 0
     else:
-        board_state[3] = 1
+        board_state[3] = 2
 
     if paddle_y == (1-paddle_height):
         board_state[4] = 11
     else:
         board_state[4] = int(12 * paddle_y/(1 - paddle_height))
 
-    board_x = board_state[0]
-    board_y = board_state[1]
 
     global game_board
     game_board = [[" " for i in range(12)] for j in range(12)]
@@ -141,7 +142,7 @@ def init_tables():
     for i in range(12):
         for j in range(12):
             for x in range(2):
-                # +1, -1
+                # -1, +1
                 # 0,   1
                 for y in range(3):
                     # +1, 0, -1
@@ -234,33 +235,31 @@ def reset_states():
 
 
 init_tables()
-while game_running and num_games < 100:
-    print("Num games is " + str(num_games))
+while game_running and num_games < 10000:
+    # print("Num games is " + str(num_games))
     update_game_state()
     current_state = tuple(board_state)
-    print("Current Board State")
-    print(current_state)
+    # print("Current Board State")
+    # print(current_state)
     move_paddle = q_learning_algo(current_state)
     #print("Move paddle is: " + str(move_paddle))
     if move_paddle == 0:
-        print("Going Down")
+        # print("Going Down")
         paddle_y -= 0.04
     elif move_paddle == 1:
-        #pass
-        print("Staying")
+        pass
+        # print("Staying")
     else:
-        print("Going Up")
+        # print("Going Up")
         paddle_y += 0.04
     update_game()
     if game_running:
         pass
         #print_board()
     else:
-        global max_bounces
-        global num_bounces
         if num_bounces > max_bounces:
             max_bounces = num_bounces
-        print("Game Over!")
+        print("Game Over! Num bounces: " + num_bounces)
         reset_states()
 
 print(max_bounces)
