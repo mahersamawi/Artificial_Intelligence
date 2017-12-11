@@ -19,8 +19,8 @@ board_state = [ball_x, ball_y, velocity_x, velocity_y, paddle_y]
 game_board = [[" " for i in range(12)] for j in range(12)]
 
 # Variables for Q learning
-learning_rate = 0.8
-discount_factor = 0.3
+learning_rate = 10
+discount_factor = 0.1
 r_prime = 0
 
 # Prev State, Action, and Reward
@@ -175,8 +175,8 @@ def print_board():
 
 
 def init_tables():
-    for i in range(12):
-        for j in range(12):
+    for i in range(13):
+        for j in range(13):
             for x in range(2):
                 # -1, +1
                 # 0,   1
@@ -191,7 +191,9 @@ def init_tables():
                             hashed_tuple = hash((i, j, x, y, paddle_pos, action))
                             Q[hashed_tuple] = 0
                             N[hashed_tuple] = 0
+
     terminal_state = hash((-1, -1, -1, -1, -1, -1, -1))
+
     Q[terminal_state] = -1
 
 def exploration_function(u, n):
@@ -217,12 +219,6 @@ def q_learning_algo(s_prime):
         prev_state_hash = hash(s_action)
         Q[prev_state_hash] = r_prime
         game_running = False
-
-        a = random.choice([0, 1, 2])
-        r = r_prime
-        r_prime = 0
-        return a
-
 
     if s is not None:
         # print("Not None")
@@ -265,7 +261,8 @@ def q_learning_algo(s_prime):
         exploration_actions.append(exploration_function(final_actions[i], final_NSAs[i]))
 
     a = exploration_actions.index(max(exploration_actions))
-
+    if num_games < 100:
+        a = random.choice([0, 1, 2])
     r = r_prime
     r_prime = 0
     return a
@@ -341,12 +338,13 @@ print("Average number of bounces per game: " + str(total_bounces/num_games))
 print("Max bounces: " + str(max_bounces))
 
 # test run
-debugging = True
+debugging = False
 reset_states()
 num_games = 0
+
 while game_running and num_games < 1:
     update_game_state()
-    print_board()
+    #print_board()
     current_state = tuple(board_state)
     move_paddle = q_learning_algo(current_state)
     #print("Move paddle is: " + str(move_paddle))
