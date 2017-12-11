@@ -153,17 +153,19 @@ def init_tables():
 
 
 def q_learning_algo(s_prime):
+    print(s_prime)
     global paddle_x
     global ball_x
     global s
     global a
     global r
     global r_prime
-    prev_state_hash = hash(tuple(list(s).append(a)))
     # Terminal State Check
     if ball_x > paddle_x:
+        prev_state_hash = hash(tuple(list(s).append(a)))
         Q[prev_state_hash] = r_prime
     if s is not None:
+        prev_state_hash = hash(tuple(list(s).append(a)))
         N[prev_state_hash] += 1
         possible_actions = []
         for i in range(3):
@@ -216,19 +218,20 @@ def reset_states():
 
 init_tables()
 while game_running:
-    current_state = (ball_x, ball_y, velocity_x, velocity_y, paddle_y)
-    # move_paddle = q_learning_algo(current_state)
-    # if move_paddle == 0:
-    #     print("Going Down")
-    #     paddle_y -= 0.04
-    # elif move_paddle == 1:
-    #     print("Staying")
-    # else:
-    #     print("Going Up")
-    #     paddle_y += 0.04
+    update_game_state()
+    current_state = tuple(board_state)
+    print(current_state)
+    move_paddle = q_learning_algo(current_state)
+    if move_paddle == 0:
+        print("Going Down")
+        paddle_y -= 0.04
+    elif move_paddle == 1:
+        print("Staying")
+    else:
+        print("Going Up")
+        paddle_y += 0.04
     update_game()
     if game_running:
-        update_game_state()
         print_board()
     else:
         print("Game Over!")
