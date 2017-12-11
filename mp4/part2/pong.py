@@ -12,6 +12,8 @@ num_bounces = 0
 game_running = True
 num_games = 0
 
+max_bounces = 0
+
 board_state = [ball_x, ball_y, velocity_x, velocity_y, paddle_y]
 game_board = [[" " for i in range(12)] for j in range(12)]
 
@@ -153,7 +155,6 @@ def init_tables():
 
 
 def q_learning_algo(s_prime):
-    print(s_prime)
     global paddle_x
     global ball_x
     global s
@@ -162,23 +163,28 @@ def q_learning_algo(s_prime):
     global r_prime
     # Terminal State Check
     if ball_x > paddle_x:
-        prev_state_hash = hash(tuple(list(s).append(a)))
+        s_action = s + (a,)
+        prev_state_hash = hash(s_action)
         Q[prev_state_hash] = r_prime
     if s is not None:
-        prev_state_hash = hash(tuple(list(s).append(a)))
+        s_action = s + (a,)
+        prev_state_hash = hash(s_action)
         N[prev_state_hash] += 1
         possible_actions = []
         for i in range(3):
-            action = hash(tuple(list(s_prime).append(i)))
+            s_prime_action = s_prime + (i,)
+            action = hash(s_prime_action)
             possible_actions.append(Q[action])
         Q[prev_state_hash] = Q[prev_state_hash] + (learning_rate * N[prev_state_hash]) * (r + discount_factor * max(possible_actions) - Q[prev_state_hash])
+        update_learning_decay()
+
     s = s_prime
     final_actions = []
     for i in range(3):
-        action = hash(tuple(list(s_prime).append(i)))
+        s_prime_action = s_prime + (i,)
+        action = hash(s_prime_action)
         final_actions.append(Q[action])
     a = final_actions.index(max(final_actions))
-    update_learning_decay()
     r = r_prime
     r_prime = 0
     return a
@@ -189,7 +195,8 @@ def update_learning_decay():
     global s
     global a
     global learning_rate
-    current_state_action = hash(tuple(list(s).append(a)))
+    s_action = s + (a,)
+    current_state_action = hash(s_action)
     learning_rate = learning_rate / (N[current_state_action] * learning_rate)
 
 
@@ -217,22 +224,35 @@ def reset_states():
 
 
 init_tables()
-while game_running:
+while game_running and num_games < 100:
+    print("Num games is " + str(num_games))
     update_game_state()
     current_state = tuple(board_state)
+    print("Current Board State")
     print(current_state)
     move_paddle = q_learning_algo(current_state)
+    print("Move paddle is: " + str(move_paddle))
     if move_paddle == 0:
-        print("Going Down")
+        #print("Going Down")
         paddle_y -= 0.04
     elif move_paddle == 1:
-        print("Staying")
+        pass
+        #print("Staying")
     else:
-        print("Going Up")
+        #print("Going Up")
         paddle_y += 0.04
     update_game()
     if game_running:
-        print_board()
+        pass
+        #print_board()
     else:
+        global max_bounces
+        global num_bounces
+        if num_bounces > max_bounces:
+            max_bounces = num_bounces
         print("Game Over!")
-        #reset_states()
+        reset_states()
+print("Whats in Q")
+for i in Q:
+    print(Q[i])
+print(max_bounces)
