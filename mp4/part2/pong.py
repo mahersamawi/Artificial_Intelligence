@@ -18,8 +18,8 @@ board_state = [ball_x, ball_y, velocity_x, velocity_y, paddle_y]
 game_board = [[" " for i in range(12)] for j in range(12)]
 
 # Variables for Q learning
-learning_rate = 0.1
-discount_factor = 0.5
+learning_rate = 1
+discount_factor = 0.8
 r_prime = 0
 # Prev State, Action, and Reward
 s = None
@@ -61,6 +61,7 @@ def update_game():
 
     # has the ball hit the paddle?
     if ball_x >= 1 and (ball_y > paddle_y and ball_y < (paddle_y + paddle_height)):
+        print("HITTTT")
         global num_bounces
         num_bounces += 1
         ball_x = 2 * paddle_x - ball_x
@@ -91,6 +92,7 @@ def update_game():
 
     if math.fabs(velocity_x) > 1:
         if velocity_x < 0:
+            # From -1 to 0
             velocity_x = -1
         else:
             velocity_x = 1
@@ -100,13 +102,15 @@ def update_game_state():
     board_state[0] = int(ball_x * 12)
     board_state[1] = int(ball_y * 12)
     if velocity_x < 0:
-        board_state[2] = -1
+        # From -1 to 0
+        board_state[2] = 0
     else:
         board_state[2] = 1
     if math.fabs(velocity_y) < 0.015:
         board_state[3] = 0
     elif velocity_y < 0:
-        board_state[3] = -1
+        # From -1 to 0
+        board_state[3] = 0
     else:
         board_state[3] = 1
 
@@ -167,6 +171,7 @@ def q_learning_algo(s_prime):
         prev_state_hash = hash(s_action)
         Q[prev_state_hash] = r_prime
     if s is not None:
+        print("Not None")
         s_action = s + (a,)
         prev_state_hash = hash(s_action)
         N[prev_state_hash] += 1
@@ -175,7 +180,11 @@ def q_learning_algo(s_prime):
             s_prime_action = s_prime + (i,)
             action = hash(s_prime_action)
             possible_actions.append(Q[action])
-        Q[prev_state_hash] = Q[prev_state_hash] + (learning_rate * N[prev_state_hash]) * (r + discount_factor * max(possible_actions) - Q[prev_state_hash])
+        term2 = (learning_rate * N[prev_state_hash])
+        term3 = (r + discount_factor * max(possible_actions) - Q[prev_state_hash])
+        val = Q[prev_state_hash] + term2 * term3
+        print(val)
+        Q[prev_state_hash] = val
         update_learning_decay()
 
     s = s_prime
@@ -184,7 +193,8 @@ def q_learning_algo(s_prime):
         s_prime_action = s_prime + (i,)
         action = hash(s_prime_action)
         final_actions.append(Q[action])
-    a = final_actions.index(max(final_actions))
+    # a = final_actions.index(max(final_actions))
+    a = random.choice([0, 1, 2])
     r = r_prime
     r_prime = 0
     return a
@@ -231,15 +241,15 @@ while game_running and num_games < 100:
     print("Current Board State")
     print(current_state)
     move_paddle = q_learning_algo(current_state)
-    print("Move paddle is: " + str(move_paddle))
+    #print("Move paddle is: " + str(move_paddle))
     if move_paddle == 0:
-        #print("Going Down")
+        print("Going Down")
         paddle_y -= 0.04
     elif move_paddle == 1:
-        pass
-        #print("Staying")
+        #pass
+        print("Staying")
     else:
-        #print("Going Up")
+        print("Going Up")
         paddle_y += 0.04
     update_game()
     if game_running:
@@ -252,7 +262,5 @@ while game_running and num_games < 100:
             max_bounces = num_bounces
         print("Game Over!")
         reset_states()
-print("Whats in Q")
-for i in Q:
-    print(Q[i])
+
 print(max_bounces)
