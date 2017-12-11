@@ -19,9 +19,10 @@ board_state = [ball_x, ball_y, velocity_x, velocity_y, paddle_y]
 game_board = [[" " for i in range(12)] for j in range(12)]
 
 # Variables for Q learning
-learning_rate = 10
-discount_factor = 0.1
+learning_rate = 1
+discount_factor = 0.9
 r_prime = 0
+learning_rate_const = 1
 
 # Prev State, Action, and Reward
 s = None
@@ -33,7 +34,7 @@ N = {}
 
 # variables for exploration function
 r_plus = 1 # "optimistic estimate of the best possible reward obtainable in any state"
-Ne = 10 # make the agent try each action-pair state at least Ne times
+Ne = 20 # make the agent try each action-pair state at least Ne times
 
 # debugging flag
 debugging = False
@@ -92,8 +93,7 @@ def update_game():
         velocity_x = -velocity_x + rand_U
         velocity_y = velocity_y + rand_V
         r_prime = 1
-
-    elif ball_x >= 1:
+    elif ball_x >  1:
         r_prime = -1
 
     # check velocity requirements
@@ -176,11 +176,11 @@ def print_board():
 
 def init_tables():
     for i in range(13):
-        for j in range(13):
+        for j in range(12):
             for x in range(2):
                 # -1, +1
                 # 0,   1
-                for y in range(3):
+                for y in range(3):     
                     # +1, 0, -1
                     # 0,  1,  2
                     for paddle_pos in range(12):
@@ -192,9 +192,14 @@ def init_tables():
                             Q[hashed_tuple] = 0
                             N[hashed_tuple] = 0
 
-    terminal_state = hash((-1, -1, -1, -1, -1, -1, -1))
 
-    Q[terminal_state] = -1
+    for i in range(12):
+        # j is hardcoded to 12 for last column
+        for x in range(2):
+            for y in range(3):
+                for paddle_pos in range(12):
+                    # action is hardcoded to 3
+                    hashed_tuple = hash((i, 12, x, y, paddle_pos, 3))
 
 def exploration_function(u, n):
     global Ne
@@ -215,9 +220,14 @@ def q_learning_algo(s_prime):
 
     # Terminal State Check
     if ball_x > paddle_x:
-        s_action = s + (a,)
+        # set -1 to all S/action pairs 
+        # for i in range(3):    
+        #     s_action = s + (i,)
+        #     prev_state_hash = hash(s_action)
+        #     Q[prev_state_hash] = -1
+        s_action = s + (3,) 
         prev_state_hash = hash(s_action)
-        Q[prev_state_hash] = r_prime
+        Q[prev_state_hash] = -1
         game_running = False
 
     if s is not None:
@@ -233,7 +243,8 @@ def q_learning_algo(s_prime):
                 print(s_prime_action)
             possible_actions.append(Q[action])
         term2 = (learning_rate * N[prev_state_hash])
-        term3 = (r + (discount_factor * max(possible_actions)))
+        term3 = (r + (discount_factor * max(possible_actions)) - Q[prev_state_hash])
+        # term3 = (r + (discount_factor * max(possible_actions)))
         val = Q[prev_state_hash] + term2 * term3
         Q[prev_state_hash] = val
         update_learning_decay()
@@ -261,8 +272,8 @@ def q_learning_algo(s_prime):
         exploration_actions.append(exploration_function(final_actions[i], final_NSAs[i]))
 
     a = exploration_actions.index(max(exploration_actions))
-    if num_games < 100:
-        a = random.choice([0, 1, 2])
+    # if num_games < 1000:
+    #     a = random.choice([0, 1, 2])
     r = r_prime
     r_prime = 0
     return a
@@ -273,7 +284,8 @@ def update_learning_decay():
     global s
     global a
     global learning_rate
-    c = 1
+    global learning_rate_const
+    c = learning_rate_const
     s_action = s + (a,)
     current_state_action = hash(s_action)
     num_times = N[current_state_action]
@@ -306,7 +318,7 @@ def reset_states():
 
 
 init_tables()
-while game_running and num_games < 10000:
+while game_running and num_games < 20000:
     # print("Num games is " + str(num_games))
     update_game_state()
     current_state = tuple(board_state)
@@ -330,19 +342,20 @@ while game_running and num_games < 10000:
     else:
         if num_bounces > max_bounces:
             max_bounces = num_bounces
-        # print("Game Over! Num bounces:  " + str(num_bounces))
+        # if (num_games % 1000 == 0):
+        #     print("Game Over! Num bounces:  " + str(num_bounces))
         total_bounces += num_bounces
         reset_states()
 
-print("Average number of bounces per game: " + str(total_bounces/num_games))
-print("Max bounces: " + str(max_bounces))
+print("Training average number of bounces per game: " + str(total_bounces/num_games))
+print("Training max bounces: " + str(max_bounces))
 
 # test run
 debugging = False
 reset_states()
 num_games = 0
-
-while game_running and num_games < 1:
+total_bounces = 0
+while game_running and num_games < 100:
     update_game_state()
     #print_board()
     current_state = tuple(board_state)
@@ -367,3 +380,5 @@ while game_running and num_games < 1:
         # print("Game Over! Num bounces:  " + str(num_bounces))
         total_bounces += num_bounces
         reset_states()
+print("Testing average number of bounces per game: " + str(total_bounces/num_games))
+print("Testing max bounces: " + str(max_bounces))
