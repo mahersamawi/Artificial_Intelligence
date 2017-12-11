@@ -8,11 +8,12 @@ velocity_y = 0.01
 paddle_height = 0.2
 paddle_y = (0.5 - paddle_height/2)
 paddle_x = 1
-num_bounces = 0
 game_running = True
 num_games = 0
 
 max_bounces = 0
+num_bounces = 0
+total_bounces = 0
 
 board_state = [ball_x, ball_y, velocity_x, velocity_y, paddle_y]
 game_board = [[" " for i in range(12)] for j in range(12)]
@@ -37,6 +38,9 @@ def update_game():
     global ball_y
     global velocity_x
     global velocity_y
+    global num_bounces
+    global r_prime
+
     if paddle_y < 0:
         paddle_y = 0
     if (paddle_y + paddle_height) > 1:
@@ -61,8 +65,6 @@ def update_game():
 
     # has the ball hit the paddle?
     if ball_x >= 1 and (ball_y > paddle_y and ball_y < (paddle_y + paddle_height)):
-        print("HITTTT")
-        global num_bounces
         num_bounces += 1
         ball_x = 2 * paddle_x - ball_x
         rand_U = random.uniform(-0.015, 0.015)
@@ -70,12 +72,10 @@ def update_game():
 
         velocity_x = -velocity_x + rand_U
         velocity_y = velocity_y + rand_V
-        global r_prime
         r_prime = 1
 
     elif ball_x >= 1:
-        global game_running
-        game_running = False
+        r_prime = -1
 
     # check velocity requirements
     if math.fabs(velocity_x) < 0.03:
@@ -103,7 +103,9 @@ def update_game_state():
     board_state[1] = int(ball_y * 12)
     board_x = board_state[0]
     board_y = board_state[1]
-    
+    # print("Board x: " + str(board_x))
+    # print("Board y: " + str(board_y))
+
     if velocity_x < 0:
         # Either -1 or 1
         board_state[2] = 0
@@ -123,14 +125,14 @@ def update_game_state():
         board_state[4] = int(12 * paddle_y/(1 - paddle_height))
 
 
-    global game_board
-    game_board = [[" " for i in range(12)] for j in range(12)]
-    print("Board x: " + str(board_x))
-    print("Board y: " + str(board_y))
-    game_board[board_y][board_x] = "O"
+    
 
 
 def print_board():
+    global game_board
+    game_board = [[" " for i in range(12)] for j in range(12)]
+    
+    game_board[board+state[0]][board_state[1]] = "O"
     print("========================== Board ===========================")
     for row in game_board:
         print(row)
@@ -171,8 +173,17 @@ def q_learning_algo(s_prime):
         s_action = s + (a,)
         prev_state_hash = hash(s_action)
         Q[prev_state_hash] = r_prime
+        global game_running
+        game_running = False
+
+        a = random.choice([0, 1, 2])
+        r = r_prime
+        r_prime = 0
+        return a
+
+
     if s is not None:
-        print("Not None")
+        # print("Not None")
         s_action = s + (a,)
         prev_state_hash = hash(s_action)
         N[prev_state_hash] += 1
@@ -180,11 +191,13 @@ def q_learning_algo(s_prime):
         for i in range(3):
             s_prime_action = s_prime + (i,)
             action = hash(s_prime_action)
+            if action not in Q:
+                print(s_prime_action)
             possible_actions.append(Q[action])
         term2 = (learning_rate * N[prev_state_hash])
         term3 = (r + discount_factor * max(possible_actions) - Q[prev_state_hash])
         val = Q[prev_state_hash] + term2 * term3
-        print(val)
+        # print(val)
         Q[prev_state_hash] = val
         update_learning_decay()
 
@@ -194,8 +207,8 @@ def q_learning_algo(s_prime):
         s_prime_action = s_prime + (i,)
         action = hash(s_prime_action)
         final_actions.append(Q[action])
-    # a = final_actions.index(max(final_actions))
-    a = random.choice([0, 1, 2])
+    a = final_actions.index(max(final_actions))
+    # a = random.choice([0, 1, 2])
     r = r_prime
     r_prime = 0
     return a
@@ -206,9 +219,10 @@ def update_learning_decay():
     global s
     global a
     global learning_rate
+    c = 1000
     s_action = s + (a,)
     current_state_action = hash(s_action)
-    learning_rate = learning_rate / (N[current_state_action] * learning_rate)
+    learning_rate = c / (N[current_state_action] * c)
 
 
 def reset_states():
@@ -259,7 +273,9 @@ while game_running and num_games < 10000:
     else:
         if num_bounces > max_bounces:
             max_bounces = num_bounces
-        print("Game Over! Num bounces: " + num_bounces)
+        # print("Game Over! Num bounces:  " + str(num_bounces))
+        total_bounces += num_bounces
         reset_states()
 
-print(max_bounces)
+print("Average number of bounces per game: " + str(total_bounces/num_games))
+print("Max bounces: " + str(max_bounces))
